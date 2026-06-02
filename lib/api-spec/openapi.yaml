@@ -1,22 +1,37 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Financial Analytics Dashboard API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: budget-categories
+    description: Budget category operations
+  - name: budget-line-items
+    description: Budget line item operations
+  - name: yearly-comparisons
+    description: Historical year comparison data
+  - name: own-revenues
+    description: Own revenue data
+  - name: balance-sheet
+    description: Balance sheet data
+  - name: custom-datasets
+    description: User-created custom datasets
+  - name: custom-data-rows
+    description: Rows within a custom dataset
+  - name: summary
+    description: Aggregated summary endpoints
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +39,650 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /budget-categories:
+    get:
+      operationId: listBudgetCategories
+      tags: [budget-categories]
+      summary: List all budget categories
+      parameters:
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of budget categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BudgetCategory"
+    post:
+      operationId: createBudgetCategory
+      tags: [budget-categories]
+      summary: Create a budget category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBudgetCategory"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BudgetCategory"
+
+  /budget-categories/{id}:
+    get:
+      operationId: getBudgetCategory
+      tags: [budget-categories]
+      summary: Get a budget category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Budget category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BudgetCategory"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateBudgetCategory
+      tags: [budget-categories]
+      summary: Update a budget category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBudgetCategory"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BudgetCategory"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteBudgetCategory
+      tags: [budget-categories]
+      summary: Delete a budget category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /budget-line-items:
+    get:
+      operationId: listBudgetLineItems
+      tags: [budget-line-items]
+      summary: List budget line items
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of budget line items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BudgetLineItem"
+    post:
+      operationId: createBudgetLineItem
+      tags: [budget-line-items]
+      summary: Create a budget line item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBudgetLineItem"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BudgetLineItem"
+
+  /budget-line-items/{id}:
+    get:
+      operationId: getBudgetLineItem
+      tags: [budget-line-items]
+      summary: Get a budget line item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Budget line item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BudgetLineItem"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateBudgetLineItem
+      tags: [budget-line-items]
+      summary: Update a budget line item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBudgetLineItem"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BudgetLineItem"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteBudgetLineItem
+      tags: [budget-line-items]
+      summary: Delete a budget line item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /yearly-comparisons:
+    get:
+      operationId: listYearlyComparisons
+      tags: [yearly-comparisons]
+      summary: List yearly budget vs spending comparisons
+      responses:
+        "200":
+          description: List of yearly comparisons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/YearlyComparison"
+    post:
+      operationId: createYearlyComparison
+      tags: [yearly-comparisons]
+      summary: Create a yearly comparison entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateYearlyComparison"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/YearlyComparison"
+
+  /yearly-comparisons/{id}:
+    put:
+      operationId: updateYearlyComparison
+      tags: [yearly-comparisons]
+      summary: Update a yearly comparison entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateYearlyComparison"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/YearlyComparison"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteYearlyComparison
+      tags: [yearly-comparisons]
+      summary: Delete a yearly comparison
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /own-revenues:
+    get:
+      operationId: listOwnRevenues
+      tags: [own-revenues]
+      summary: List own revenue items
+      parameters:
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of own revenues
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OwnRevenue"
+    post:
+      operationId: createOwnRevenue
+      tags: [own-revenues]
+      summary: Create an own revenue item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOwnRevenue"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OwnRevenue"
+
+  /own-revenues/{id}:
+    put:
+      operationId: updateOwnRevenue
+      tags: [own-revenues]
+      summary: Update an own revenue item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOwnRevenue"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OwnRevenue"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteOwnRevenue
+      tags: [own-revenues]
+      summary: Delete an own revenue item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /balance-sheet:
+    get:
+      operationId: listBalanceSheetItems
+      tags: [balance-sheet]
+      summary: List balance sheet items
+      parameters:
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of balance sheet items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BalanceSheetItem"
+
+  /summary/utilization:
+    get:
+      operationId: getBudgetUtilizationSummary
+      tags: [summary]
+      summary: Get aggregated budget utilization summary
+      parameters:
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Budget utilization summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BudgetUtilizationSummary"
+
+  /summary/trend:
+    get:
+      operationId: getYearlyTrend
+      tags: [summary]
+      summary: Get yearly budget vs spending trend data
+      responses:
+        "200":
+          description: Trend data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/YearlyComparison"
+
+  /custom-datasets:
+    get:
+      operationId: listCustomDatasets
+      tags: [custom-datasets]
+      summary: List all custom datasets
+      responses:
+        "200":
+          description: List of custom datasets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CustomDataset"
+    post:
+      operationId: createCustomDataset
+      tags: [custom-datasets]
+      summary: Create a custom dataset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomDataset"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomDataset"
+
+  /custom-datasets/{id}:
+    get:
+      operationId: getCustomDataset
+      tags: [custom-datasets]
+      summary: Get a custom dataset with its rows
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Custom dataset with rows
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomDatasetWithRows"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateCustomDataset
+      tags: [custom-datasets]
+      summary: Update a custom dataset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomDataset"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomDataset"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteCustomDataset
+      tags: [custom-datasets]
+      summary: Delete a custom dataset and all its rows
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /custom-datasets/{datasetId}/rows:
+    get:
+      operationId: listCustomDataRows
+      tags: [custom-data-rows]
+      summary: List rows in a custom dataset
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CustomDataRow"
+    post:
+      operationId: createCustomDataRow
+      tags: [custom-data-rows]
+      summary: Add a row to a custom dataset
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomDataRow"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomDataRow"
+
+  /custom-datasets/{datasetId}/rows/{rowId}:
+    put:
+      operationId: updateCustomDataRow
+      tags: [custom-data-rows]
+      summary: Update a row
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: rowId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomDataRow"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomDataRow"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteCustomDataRow
+      tags: [custom-data-rows]
+      summary: Delete a row
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: rowId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +693,369 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    BudgetCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        year:
+          type: integer
+        initialBudget:
+          type: number
+        finalBudget:
+          type: number
+        spent:
+          type: number
+        remaining:
+          type: number
+        utilizationPct:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - year
+        - initialBudget
+        - finalBudget
+        - spent
+        - remaining
+        - utilizationPct
+        - createdAt
+
+    CreateBudgetCategory:
+      type: object
+      properties:
+        name:
+          type: string
+        year:
+          type: integer
+        initialBudget:
+          type: number
+        finalBudget:
+          type: number
+        spent:
+          type: number
+        remaining:
+          type: number
+        utilizationPct:
+          type: number
+      required:
+        - name
+        - year
+        - initialBudget
+        - finalBudget
+        - spent
+        - remaining
+        - utilizationPct
+
+    BudgetLineItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        categoryId:
+          type: integer
+        name:
+          type: string
+        amount:
+          type: number
+        percentage:
+          type: number
+        year:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - categoryId
+        - name
+        - amount
+        - percentage
+        - year
+        - createdAt
+
+    CreateBudgetLineItem:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+        name:
+          type: string
+        amount:
+          type: number
+        percentage:
+          type: number
+        year:
+          type: integer
+      required:
+        - categoryId
+        - name
+        - amount
+        - percentage
+        - year
+
+    YearlyComparison:
+      type: object
+      properties:
+        id:
+          type: integer
+        year:
+          type: integer
+        totalBudget:
+          type: number
+        totalSpent:
+          type: number
+        utilizationPct:
+          type: number
+      required:
+        - id
+        - year
+        - totalBudget
+        - totalSpent
+        - utilizationPct
+
+    CreateYearlyComparison:
+      type: object
+      properties:
+        year:
+          type: integer
+        totalBudget:
+          type: number
+        totalSpent:
+          type: number
+        utilizationPct:
+          type: number
+      required:
+        - year
+        - totalBudget
+        - totalSpent
+        - utilizationPct
+
+    OwnRevenue:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        amount:
+          type: number
+        percentage:
+          type: number
+        year:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - amount
+        - percentage
+        - year
+        - createdAt
+
+    CreateOwnRevenue:
+      type: object
+      properties:
+        name:
+          type: string
+        amount:
+          type: number
+        percentage:
+          type: number
+        year:
+          type: integer
+      required:
+        - name
+        - amount
+        - percentage
+        - year
+
+    BalanceSheetItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        category:
+          type: string
+          enum: [asset, liability, capital]
+        name:
+          type: string
+        amount:
+          type: number
+        year:
+          type: integer
+        sortOrder:
+          type: integer
+      required:
+        - id
+        - category
+        - name
+        - amount
+        - year
+        - sortOrder
+
+    BudgetUtilizationSummary:
+      type: object
+      properties:
+        year:
+          type: integer
+        totalInitialBudget:
+          type: number
+        totalFinalBudget:
+          type: number
+        totalSpent:
+          type: number
+        totalRemaining:
+          type: number
+        overallUtilizationPct:
+          type: number
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/BudgetCategory"
+      required:
+        - year
+        - totalInitialBudget
+        - totalFinalBudget
+        - totalSpent
+        - totalRemaining
+        - overallUtilizationPct
+        - categories
+
+    CustomDataset:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        chartType:
+          type: string
+          enum: [bar, line, pie, area]
+        xAxisLabel:
+          type: string
+        yAxisLabel:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - chartType
+        - createdAt
+        - updatedAt
+
+    CreateCustomDataset:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        chartType:
+          type: string
+          enum: [bar, line, pie, area]
+        xAxisLabel:
+          type: string
+        yAxisLabel:
+          type: string
+      required:
+        - name
+        - chartType
+
+    CustomDatasetWithRows:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        chartType:
+          type: string
+          enum: [bar, line, pie, area]
+        xAxisLabel:
+          type: string
+        yAxisLabel:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomDataRow"
+      required:
+        - id
+        - name
+        - chartType
+        - createdAt
+        - updatedAt
+        - rows
+
+    CustomDataRow:
+      type: object
+      properties:
+        id:
+          type: integer
+        datasetId:
+          type: integer
+        label:
+          type: string
+        value:
+          type: number
+        color:
+          type: string
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - datasetId
+        - label
+        - value
+        - sortOrder
+        - createdAt
+
+    CreateCustomDataRow:
+      type: object
+      properties:
+        label:
+          type: string
+        value:
+          type: number
+        color:
+          type: string
+        sortOrder:
+          type: integer
+      required:
+        - label
+        - value
+        - sortOrder
