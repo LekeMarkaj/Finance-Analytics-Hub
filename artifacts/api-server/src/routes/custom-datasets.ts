@@ -86,15 +86,19 @@ router.put("/custom-datasets/:datasetId/rows/:rowId", async (req, res): Promise<
   const [row] = await db
     .update(customDataRowsTable)
     .set(parsed.data)
-    .where(eq(customDataRowsTable.id, rowId))
+    .where(and(eq(customDataRowsTable.id, rowId), eq(customDataRowsTable.datasetId, datasetId)))
     .returning();
   if (!row) { res.status(404).json({ error: "Not found" }); return; }
   res.json(rowToApi(row));
 });
 
 router.delete("/custom-datasets/:datasetId/rows/:rowId", async (req, res): Promise<void> => {
+  const datasetId = Number(req.params.datasetId);
   const rowId = Number(req.params.rowId);
-  const [row] = await db.delete(customDataRowsTable).where(eq(customDataRowsTable.id, rowId)).returning();
+  const [row] = await db
+    .delete(customDataRowsTable)
+    .where(and(eq(customDataRowsTable.id, rowId), eq(customDataRowsTable.datasetId, datasetId)))
+    .returning();
   if (!row) { res.status(404).json({ error: "Not found" }); return; }
   res.status(204).send();
 });

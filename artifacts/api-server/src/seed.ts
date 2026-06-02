@@ -80,6 +80,8 @@ async function seed() {
   console.log("Inserted budget line items");
 
   await db.insert(yearlyComparisonsTable).values([
+    { year: 2020, totalBudget: "98400000.00", totalSpent: "94200000.00", utilizationPct: "95.73" },
+    { year: 2021, totalBudget: "112800000.00", totalSpent: "108100000.00", utilizationPct: "95.83" },
     { year: 2022, totalBudget: "133600000.00", totalSpent: "128000000.00", utilizationPct: "95.80" },
     { year: 2023, totalBudget: "155200000.00", totalSpent: "149800000.00", utilizationPct: "96.50" },
     { year: 2024, totalBudget: "179400000.00", totalSpent: "178900000.00", utilizationPct: "99.70" },

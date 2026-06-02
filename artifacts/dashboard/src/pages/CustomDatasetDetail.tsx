@@ -266,7 +266,7 @@ function DataRowFormDialog({ row, datasetId, nextSortOrder = 1 }: { row?: any, d
     };
 
     if (isEditing) {
-      updateMut.mutate({ id: row.id, data: payload }, {
+      updateMut.mutate({ datasetId, rowId: row.id, data: payload }, {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ['customDataRows', datasetId] });
           setOpen(false);
@@ -333,7 +333,7 @@ function DeleteDataRowDialog({ id, label, datasetId }: { id: number, label: stri
   const { toast } = useToast();
 
   const handleDelete = () => {
-    deleteMut.mutate({ id }, {
+    deleteMut.mutate({ datasetId, rowId: id }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['customDataRows', datasetId] });
         setOpen(false);
