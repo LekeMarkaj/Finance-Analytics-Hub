@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { customDatasetsTable, customDataRowsTable, insertCustomDatasetSchema, insertCustomDataRowSchema } from "@workspace/db";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, and } from "drizzle-orm";
 
 const router = Router();
 
