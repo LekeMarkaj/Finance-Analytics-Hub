@@ -1,0 +1,1 @@
+- [PDF extraction library](pdf-extraction.md) — pdf-parse v2 crashes Node.js on startup (DOMMatrix); use unpdf instead

@@ -8,6 +8,7 @@ import balanceSheetRouter from "./balance-sheet";
 import summaryRouter from "./summary";
 import customDatasetsRouter from "./custom-datasets";
 import adminUsersRouter from "./admin-users";
+import pdfUploadRouter from "./pdf-upload";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(balanceSheetRouter);
 router.use(summaryRouter);
 router.use(customDatasetsRouter);
 router.use(adminUsersRouter);
+router.use(pdfUploadRouter);
 
 export default router;

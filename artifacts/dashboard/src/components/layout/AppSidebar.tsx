@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, ListTree, TrendingUp, PiggyBank, FileSpreadsheet, Database, LogOut, Settings, Users } from "lucide-react";
+import { LayoutDashboard, ListTree, TrendingUp, PiggyBank, FileSpreadsheet, Database, LogOut, Settings, Users, FileSearch } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/react";
 import {
@@ -26,6 +26,7 @@ const navItems = [
 
 const customNavItems = [
   { name: "Custom Datasets", href: "/custom", icon: Database },
+  { name: "PDF Report Analyser", href: "/pdf-upload", icon: FileSearch },
 ];
 
 const adminNavItems = [
