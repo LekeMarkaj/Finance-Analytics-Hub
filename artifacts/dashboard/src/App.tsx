@@ -16,6 +16,7 @@ import BalanceSheet from "@/pages/BalanceSheet";
 import CustomDatasets from "@/pages/CustomDatasets";
 import CustomDatasetDetail from "@/pages/CustomDatasetDetail";
 import Profile from "@/pages/Profile";
+import AdminUsers from "@/pages/AdminUsers";
 import NotFound from "@/pages/not-found";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -197,6 +198,9 @@ function AppRoutes() {
         </Route>
         <Route path="/profile/*?">
           {() => <ProtectedRoute component={Profile} />}
+        </Route>
+        <Route path="/admin/users">
+          {() => <ProtectedRoute component={AdminUsers} />}
         </Route>
         <Route component={NotFound} />
       </Switch>

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, ListTree, TrendingUp, PiggyBank, FileSpreadsheet, Database, LogOut, Settings } from "lucide-react";
+import { LayoutDashboard, ListTree, TrendingUp, PiggyBank, FileSpreadsheet, Database, LogOut, Settings, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/react";
 import {
@@ -28,11 +28,17 @@ const customNavItems = [
   { name: "Custom Datasets", href: "/custom", icon: Database },
 ];
 
+const adminNavItems = [
+  { name: "User Management", href: "/admin/users", icon: Users },
+];
+
 export function AppSidebar() {
   const [location] = useLocation();
   const { setOpenMobile } = useSidebar();
   const { user } = useUser();
   const { signOut } = useClerk();
+
+  const isAdmin = user?.publicMetadata?.role === "admin";
 
   const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -101,6 +107,31 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Administration</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {adminNavItems.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={location === item.href || location.startsWith(item.href)}
+                      tooltip={item.name}
+                      onClick={() => setOpenMobile(false)}
+                    >
+                      <Link href={item.href} className="flex items-center gap-3">
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       
       <SidebarFooter className="border-t border-sidebar-border p-4">

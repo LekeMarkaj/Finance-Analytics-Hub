@@ -7,6 +7,7 @@ import ownRevenuesRouter from "./own-revenues";
 import balanceSheetRouter from "./balance-sheet";
 import summaryRouter from "./summary";
 import customDatasetsRouter from "./custom-datasets";
+import adminUsersRouter from "./admin-users";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(ownRevenuesRouter);
 router.use(balanceSheetRouter);
 router.use(summaryRouter);
 router.use(customDatasetsRouter);
+router.use(adminUsersRouter);
 
 export default router;
