@@ -6,6 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const BASE_URL = import.meta.env.BASE_URL.replace(/\/$/, "");
 const API_BASE = `${BASE_URL}/api`;
@@ -49,8 +59,15 @@ async function setUserRole(userId: string, role: "admin" | "user"): Promise<void
   }
 }
 
+interface PendingRoleChange {
+  userId: string;
+  displayName: string;
+  newRole: "admin" | "user";
+}
+
 export default function AdminUsers() {
   const [search, setSearch] = useState("");
+  const [pendingRoleChange, setPendingRoleChange] = useState<PendingRoleChange | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user: currentUser } = useUser();
@@ -251,9 +268,10 @@ export default function AdminUsers() {
                                 size="sm"
                                 disabled={toggleRole.isPending}
                                 onClick={() =>
-                                  toggleRole.mutate({
+                                  setPendingRoleChange({
                                     userId: user.id,
-                                    role: user.role === "admin" ? "user" : "admin",
+                                    displayName: user.displayName,
+                                    newRole: user.role === "admin" ? "user" : "admin",
                                   })
                                 }
                                 className={
@@ -291,6 +309,57 @@ export default function AdminUsers() {
           </>
         )}
       </div>
+
+      <AlertDialog
+        open={pendingRoleChange !== null}
+        onOpenChange={(open) => { if (!open) setPendingRoleChange(null); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingRoleChange?.newRole === "admin"
+                ? "Grant admin privileges?"
+                : "Remove admin privileges?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingRoleChange?.newRole === "admin" ? (
+                <>
+                  <strong>{pendingRoleChange.displayName}</strong> will become an admin and gain
+                  full access to User Management and all admin features.
+                </>
+              ) : (
+                <>
+                  <strong>{pendingRoleChange?.displayName}</strong> will lose admin access and
+                  be returned to a regular user role.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingRoleChange(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingRoleChange) {
+                  toggleRole.mutate({
+                    userId: pendingRoleChange.userId,
+                    role: pendingRoleChange.newRole,
+                  });
+                  setPendingRoleChange(null);
+                }
+              }}
+              className={
+                pendingRoleChange?.newRole === "admin"
+                  ? undefined
+                  : "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              }
+            >
+              {pendingRoleChange?.newRole === "admin" ? "Grant Admin" : "Remove Admin"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
