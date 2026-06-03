@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { LayoutDashboard, ListTree, TrendingUp, PiggyBank, FileSpreadsheet, Database, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useUser, useClerk } from "@clerk/react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const navItems = [
-  { name: "Overview", href: "/", icon: LayoutDashboard },
+  { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { name: "Budget Categories", href: "/categories", icon: ListTree },
   { name: "Historical Trends", href: "/trends", icon: TrendingUp },
   { name: "Own Revenues", href: "/revenues", icon: PiggyBank },
@@ -30,6 +31,18 @@ const customNavItems = [
 export function AppSidebar() {
   const [location] = useLocation();
   const { setOpenMobile } = useSidebar();
+  const { user } = useUser();
+  const { signOut } = useClerk();
+
+  const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+  const displayName = user?.fullName || user?.firstName || user?.primaryEmailAddress?.emailAddress || "User";
+  const initials = displayName
+    .split(" ")
+    .map((n: string) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <Sidebar variant="inset">
@@ -51,7 +64,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton 
                     asChild 
-                    isActive={location === item.href || (item.href !== "/" && location.startsWith(item.href))}
+                    isActive={location === item.href || (item.href !== "/dashboard" && location.startsWith(item.href))}
                     tooltip={item.name}
                     onClick={() => setOpenMobile(false)}
                   >
@@ -92,13 +105,23 @@ export function AppSidebar() {
       
       <SidebarFooter className="border-t border-sidebar-border p-4">
         <div className="flex items-center gap-3 text-sm text-sidebar-foreground">
-          <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center font-medium">
-            AD
+          <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center font-medium text-sidebar-accent-foreground text-xs">
+            {initials}
           </div>
-          <div className="flex-1 truncate">
-            <p className="font-medium truncate">Admin User</p>
-            <p className="text-xs text-sidebar-foreground/60 truncate">Finance Dept</p>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium truncate">{displayName}</p>
+            <p className="text-xs text-sidebar-foreground/60 truncate">
+              {user?.primaryEmailAddress?.emailAddress || ""}
+            </p>
           </div>
+          <button
+            type="button"
+            onClick={() => signOut({ redirectUrl: basePath || "/" })}
+            className="p-1.5 rounded hover:bg-sidebar-accent/60 transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground flex-shrink-0"
+            title="Sign out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </SidebarFooter>
     </Sidebar>
