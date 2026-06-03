@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@clerk/react";
 
 const BASE_URL = import.meta.env.BASE_URL.replace(/\/$/, "");
 const API_BASE = `${BASE_URL}/api`;
@@ -36,10 +37,23 @@ async function setUserBanned(userId: string, banned: boolean): Promise<void> {
   }
 }
 
+async function setUserRole(userId: string, role: "admin" | "user"): Promise<void> {
+  const res = await fetch(`${API_BASE}/admin/users/${userId}/set-role`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ role }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || "Request failed");
+  }
+}
+
 export default function AdminUsers() {
   const [search, setSearch] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user: currentUser } = useUser();
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["admin-users"],
@@ -57,6 +71,28 @@ export default function AdminUsers() {
         description: banned
           ? "The user has been banned and can no longer sign in."
           : "The user has been re-enabled and can sign in again.",
+      });
+    },
+    onError: (err: Error) => {
+      toast({
+        title: "Action failed",
+        description: err.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const toggleRole = useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: "admin" | "user" }) =>
+      setUserRole(userId, role),
+    onSuccess: (_data, { role }) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast({
+        title: role === "admin" ? "Admin granted" : "Admin removed",
+        description:
+          role === "admin"
+            ? "The user now has admin privileges."
+            : "The user's admin privileges have been removed.",
       });
     },
     onError: (err: Error) => {
@@ -208,21 +244,43 @@ export default function AdminUsers() {
                           )}
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <Button
-                            variant={user.banned ? "outline" : "ghost"}
-                            size="sm"
-                            disabled={toggleBan.isPending}
-                            onClick={() =>
-                              toggleBan.mutate({ userId: user.id, banned: !user.banned })
-                            }
-                            className={
-                              user.banned
-                                ? "text-green-700 border-green-200 hover:bg-green-50"
-                                : "text-destructive hover:text-destructive hover:bg-destructive/10"
-                            }
-                          >
-                            {user.banned ? "Enable" : "Disable"}
-                          </Button>
+                          <div className="flex items-center justify-end gap-2">
+                            {user.id !== currentUser?.id && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={toggleRole.isPending}
+                                onClick={() =>
+                                  toggleRole.mutate({
+                                    userId: user.id,
+                                    role: user.role === "admin" ? "user" : "admin",
+                                  })
+                                }
+                                className={
+                                  user.role === "admin"
+                                    ? "text-amber-700 border-amber-200 hover:bg-amber-50"
+                                    : "text-primary border-primary/20 hover:bg-primary/10"
+                                }
+                              >
+                                {user.role === "admin" ? "Remove Admin" : "Make Admin"}
+                              </Button>
+                            )}
+                            <Button
+                              variant={user.banned ? "outline" : "ghost"}
+                              size="sm"
+                              disabled={toggleBan.isPending}
+                              onClick={() =>
+                                toggleBan.mutate({ userId: user.id, banned: !user.banned })
+                              }
+                              className={
+                                user.banned
+                                  ? "text-green-700 border-green-200 hover:bg-green-50"
+                                  : "text-destructive hover:text-destructive hover:bg-destructive/10"
+                              }
+                            >
+                              {user.banned ? "Enable" : "Disable"}
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))

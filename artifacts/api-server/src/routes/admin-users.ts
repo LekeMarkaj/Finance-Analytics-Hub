@@ -56,4 +56,22 @@ router.post("/admin/users/:userId/enable", requireAdmin, async (req, res): Promi
   res.json({ ok: true });
 });
 
+router.post("/admin/users/:userId/set-role", requireAdmin, async (req: any, res): Promise<void> => {
+  const { userId } = req.params;
+  if (userId === req.adminUserId) {
+    res.status(400).json({ error: "Cannot change your own role" });
+    return;
+  }
+  const { role } = req.body;
+  if (role !== "admin" && role !== "user") {
+    res.status(400).json({ error: "Invalid role. Must be 'admin' or 'user'" });
+    return;
+  }
+  const clerk = getClerkClient();
+  await clerk.users.updateUser(userId, {
+    publicMetadata: { role },
+  });
+  res.json({ ok: true });
+});
+
 export default router;
