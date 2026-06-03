@@ -15,6 +15,7 @@ import Revenues from "@/pages/Revenues";
 import BalanceSheet from "@/pages/BalanceSheet";
 import CustomDatasets from "@/pages/CustomDatasets";
 import CustomDatasetDetail from "@/pages/CustomDatasetDetail";
+import Profile from "@/pages/Profile";
 import NotFound from "@/pages/not-found";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -193,6 +194,9 @@ function AppRoutes() {
         </Route>
         <Route path="/custom/:id">
           {() => <ProtectedRoute component={CustomDatasetDetail} />}
+        </Route>
+        <Route path="/profile/*?">
+          {() => <ProtectedRoute component={Profile} />}
         </Route>
         <Route component={NotFound} />
       </Switch>
