@@ -12,12 +12,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Trash2, Edit, Plus, ChevronRight } from "lucide-react";
+import { Trash2, Edit, Plus, ChevronRight, Download } from "lucide-react";
+import Papa from "papaparse";
 
 export default function Categories() {
   const year = useYearFilter(2025);
   const { data, isLoading, isFetching } = useListBudgetCategories({ year }, { query: { queryKey: ['categories', year] } });
-  
+
+  const handleExportCsv = () => {
+    const rows = (data ?? []).map(c => ({
+      Year: year,
+      Category: c.name,
+      "Initial Budget (€)": c.initialBudget,
+      "Final Budget (€)": c.finalBudget,
+      "Spent (€)": c.spent,
+      "Remaining (€)": c.remaining,
+      "Utilization (%)": c.utilizationPct,
+    }));
+    const csv = Papa.unparse(rows);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `budget-categories-${year}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -27,6 +48,10 @@ export default function Categories() {
         </div>
         <div className="flex items-center gap-4">
           <YearFilter defaultYear={2025} />
+          <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={isLoading || isFetching || !data?.length}>
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
           <CategoryFormDialog year={year} />
         </div>
       </div>

@@ -3,9 +3,11 @@ import { useYearFilter, YearFilter } from "@/components/YearFilter";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { formatCurrency, formatPercent, formatCompactCurrency } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, BarChart, Bar, Legend, Cell, PieChart, Pie } from "recharts";
-import { AlertCircle, TrendingUp, PiggyBank, Target, Activity } from "lucide-react";
+import { AlertCircle, TrendingUp, PiggyBank, Target, Activity, Download, Printer } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import Papa from "papaparse";
 
 const CHART_COLORS = {
   blue: "#0079F2",
@@ -48,6 +50,17 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
+function downloadCsv(filename: string, rows: object[]) {
+  const csv = Papa.unparse(rows);
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function Dashboard() {
   const year = useYearFilter(2025);
   const summaryQuery = useGetBudgetUtilizationSummary({ year }, { query: { queryKey: ['summary', year] } });
@@ -71,6 +84,19 @@ export default function Dashboard() {
   const trends = trendQuery.data;
   const revenues = revenuesQuery.data;
 
+  const handleExportCsv = () => {
+    const categoryRows = (summary?.categories ?? []).map(c => ({
+      Year: year,
+      Category: c.name,
+      "Initial Budget (€)": c.initialBudget,
+      "Final Budget (€)": c.finalBudget,
+      "Spent (€)": c.spent,
+      "Remaining (€)": c.remaining,
+      "Utilization (%)": c.utilizationPct,
+    }));
+    downloadCsv(`financial-overview-${year}.csv`, categoryRows);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -80,6 +106,14 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-2">
           <YearFilter defaultYear={2025} />
+          <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={loading}>
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Printer className="w-4 h-4 mr-2" />
+            Print / Export PDF
+          </Button>
         </div>
       </div>
 

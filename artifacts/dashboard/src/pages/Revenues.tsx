@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Trash2, Edit, Plus } from "lucide-react";
+import { Trash2, Edit, Plus, Download } from "lucide-react";
+import Papa from "papaparse";
 
 export default function Revenues() {
   const year = useYearFilter(2025);
@@ -19,6 +20,23 @@ export default function Revenues() {
   const loading = isLoading || isFetching;
 
   const totalRevenue = revenues?.reduce((sum, r) => sum + r.amount, 0) || 0;
+
+  const handleExportCsv = () => {
+    const rows = (revenues ?? []).map(r => ({
+      Year: year,
+      "Source Name": r.name,
+      "Amount (€)": r.amount,
+      "% of Total": r.percentage,
+    }));
+    const csv = Papa.unparse(rows);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `own-revenues-${year}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-6">
@@ -29,6 +47,10 @@ export default function Revenues() {
         </div>
         <div className="flex items-center gap-4">
           <YearFilter defaultYear={2025} />
+          <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={loading || !revenues?.length}>
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
           <RevenueFormDialog year={year} />
         </div>
       </div>
