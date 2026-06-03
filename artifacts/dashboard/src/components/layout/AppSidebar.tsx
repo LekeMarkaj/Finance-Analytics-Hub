@@ -139,10 +139,20 @@ export function AppSidebar() {
           <Link
             href="/profile"
             onClick={() => setOpenMobile(false)}
-            className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center font-medium text-sidebar-accent-foreground text-xs flex-shrink-0 hover:opacity-80 transition-opacity"
+            className="w-8 h-8 rounded-full flex-shrink-0 hover:opacity-80 transition-opacity overflow-hidden"
             title="Account settings"
           >
-            {initials}
+            {user?.imageUrl ? (
+              <img
+                src={user.imageUrl}
+                alt={displayName}
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center font-medium text-sidebar-accent-foreground text-xs">
+                {initials}
+              </div>
+            )}
           </Link>
           <div className="flex-1 min-w-0">
             <p className="font-medium truncate">{displayName}</p>
