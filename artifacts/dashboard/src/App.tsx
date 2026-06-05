@@ -107,7 +107,7 @@ function LandingPage() {
           <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold">
             €
           </div>
-          <span>SHSKUK Finance</span>
+          <span>Financial Analytics</span>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/sign-in">
@@ -267,7 +267,7 @@ function ClerkProviderWithRoutes() {
         signUp: {
           start: {
             title: "Create your account",
-            subtitle: "Get started with SHSKUK Finance",
+            subtitle: "Get started with Financial Analytics",
           },
         },
       }}

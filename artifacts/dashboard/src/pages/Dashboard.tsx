@@ -102,7 +102,7 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Financial Overview</h1>
-          <p className="text-muted-foreground mt-1">High-level view of SHSKUK financial health and budget execution.</p>
+          <p className="text-muted-foreground mt-1">High-level view of financial health and budget execution.</p>
         </div>
         <div className="flex items-center gap-2">
           <YearFilter defaultYear={2025} />

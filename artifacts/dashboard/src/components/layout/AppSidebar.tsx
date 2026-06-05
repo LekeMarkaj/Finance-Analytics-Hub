@@ -61,7 +61,7 @@ export function AppSidebar() {
           <div className="w-6 h-6 rounded bg-primary flex items-center justify-center text-primary-foreground text-xs flex-shrink-0">
             €
           </div>
-          <span className="truncate flex-1">SHSKUK Finance</span>
+          <span className="truncate flex-1">Financial Analytics</span>
           <button
             onClick={toggleTheme}
             title={isDark ? "Switch to light mode" : "Switch to dark mode"}
