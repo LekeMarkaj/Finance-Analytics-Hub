@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, ListTree, TrendingUp, PiggyBank, FileSpreadsheet, Database, LogOut, Settings, Users, FileSearch } from "lucide-react";
+import { LayoutDashboard, ListTree, TrendingUp, PiggyBank, FileSpreadsheet, Database, LogOut, Settings, Users, FileSearch, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/react";
 import {
@@ -13,8 +13,10 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useTheme } from "@/hooks/use-theme";
 
 const navItems = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -38,6 +40,7 @@ export function AppSidebar() {
   const { setOpenMobile } = useSidebar();
   const { user } = useUser();
   const { signOut } = useClerk();
+  const { isDark, toggleTheme } = useTheme();
 
   const isAdmin = user?.publicMetadata?.role === "admin";
 
@@ -55,10 +58,18 @@ export function AppSidebar() {
     <Sidebar variant="inset">
       <SidebarHeader className="h-16 flex items-center px-4 border-b border-sidebar-border bg-sidebar">
         <div className="flex items-center gap-2 font-bold text-sidebar-foreground w-full">
-          <div className="w-6 h-6 rounded bg-primary flex items-center justify-center text-primary-foreground text-xs">
+          <div className="w-6 h-6 rounded bg-primary flex items-center justify-center text-primary-foreground text-xs flex-shrink-0">
             €
           </div>
-          <span className="truncate">SHSKUK Finance</span>
+          <span className="truncate flex-1">SHSKUK Finance</span>
+          <button
+            onClick={toggleTheme}
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            className="p-1.5 rounded hover:bg-sidebar-accent/60 transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground flex-shrink-0"
+          >
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+          <SidebarTrigger className="p-1.5 rounded hover:bg-sidebar-accent/60 transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground flex-shrink-0 [&>svg]:w-4 [&>svg]:h-4" />
         </div>
       </SidebarHeader>
       
