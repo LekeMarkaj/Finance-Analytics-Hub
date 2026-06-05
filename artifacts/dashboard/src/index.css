@@ -161,67 +161,68 @@
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .05);
 
-  --opaque-button-border-intensity: 9;  /* In terms of percentages */
+  --opaque-button-border-intensity: 9;
 
-  /* Backgrounds applied on top of other backgrounds when hovered/active */
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
+  /* Main background — same dark blue family as the sidebar */
+  --background: 222 47% 9%;
+  --foreground: 210 40% 96%;
 
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
+  --border: 217 33% 20%;
+  --input: 217 33% 20%;
+  --ring: 213 94% 52%;
 
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --card-border: 217.2 32.6% 17.5%;
+  /* Cards sit a step above the background */
+  --card: 222 45% 13%;
+  --card-foreground: 210 40% 96%;
+  --card-border: 217 33% 22%;
 
+  /* Sidebar unchanged — it blends seamlessly in dark mode */
   --sidebar: 222 47% 11%;
   --sidebar-foreground: 210 40% 98%;
   --sidebar-border: 217 33% 17%;
-  --sidebar-primary: 221 83% 53%;
+  --sidebar-primary: 213 94% 52%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 217 33% 17%;
   --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-ring: 221 83% 53%;
+  --sidebar-ring: 213 94% 52%;
 
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --popover-border: 217.2 32.6% 17.5%;
+  --popover: 222 45% 13%;
+  --popover-foreground: 210 40% 96%;
+  --popover-border: 217 33% 22%;
 
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
+  --primary: 213 94% 58%;
+  --primary-foreground: 222 47% 9%;
 
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
+  --secondary: 217 33% 19%;
+  --secondary-foreground: 210 40% 96%;
 
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 62%;
 
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
+  --accent: 217 33% 19%;
+  --accent-foreground: 210 40% 96%;
 
-  --destructive: 0 62.8% 30.6%;
+  --destructive: 0 72% 42%;
   --destructive-foreground: 210 40% 98%;
 
-  --chart-1: 211 100% 55%;
+  --chart-1: 213 94% 62%;
   --chart-2: 250 100% 74%;
-  --chart-3: 130 100% 36%;
-  --chart-4: 0 91% 42%;
+  --chart-3: 130 100% 40%;
+  --chart-4: 0 91% 52%;
   --chart-5: 330 81% 65%;
 
   color-scheme: dark;
-  --shadow-2xs: 0 1px 1px 0 rgb(0 0 0 / 0);
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0);
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0), 0 1px 2px -1px rgb(0 0 0 / 0);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0), 0 2px 4px -2px rgb(0 0 0 / 0);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0), 0 4px 6px -4px rgb(0 0 0 / 0);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0), 0 8px 10px -6px rgb(0 0 0 / 0);
-  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0);
-
+  --shadow-2xs: 0 1px 1px 0 rgb(0 0 0 / 0.2);
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.25);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.4);
 }
 
 @layer base {
