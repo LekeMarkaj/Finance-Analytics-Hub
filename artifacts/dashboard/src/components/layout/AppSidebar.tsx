@@ -58,9 +58,6 @@ export function AppSidebar() {
     <Sidebar variant="inset">
       <SidebarHeader className="h-16 flex items-center px-4 border-b border-sidebar-border bg-sidebar">
         <div className="flex items-center gap-2 font-bold text-sidebar-foreground w-full">
-          <div className="w-6 h-6 rounded bg-primary flex items-center justify-center text-primary-foreground text-xs flex-shrink-0">
-            €
-          </div>
           <span className="truncate flex-1">Financial Analytics</span>
           <button
             onClick={toggleTheme}
