@@ -1,6 +1,5 @@
 import { Link, useLocation } from "wouter";
 import { LayoutDashboard, ListTree, TrendingUp, PiggyBank, FileSpreadsheet, Database, LogOut, Settings, Users, FileSearch, Sun, Moon } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useUser, useClerk } from "@clerk/react";
 import {
   Sidebar,
@@ -43,33 +42,19 @@ export function AppSidebar() {
   const { isDark, toggleTheme } = useTheme();
 
   const isAdmin = user?.publicMetadata?.role === "admin";
-
   const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-  const displayName = user?.fullName || user?.firstName || user?.primaryEmailAddress?.emailAddress || "User";
-  const initials = displayName
-    .split(" ")
-    .map((n: string) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-
   return (
-    <Sidebar variant="inset">
-      <SidebarHeader className="h-16 flex items-center px-4 border-b border-sidebar-border bg-sidebar">
-        <div className="flex items-center gap-2 font-bold text-sidebar-foreground w-full">
-          <span className="truncate flex-1">Financial Analytics</span>
-          <button
-            onClick={toggleTheme}
-            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            className="p-1.5 rounded hover:bg-sidebar-accent/60 transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground flex-shrink-0"
-          >
-            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
-          <SidebarTrigger className="p-1.5 rounded hover:bg-sidebar-accent/60 transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground flex-shrink-0 [&>svg]:w-4 [&>svg]:h-4" />
+    <Sidebar collapsible="icon" variant="inset">
+      <SidebarHeader className="h-16 flex items-center px-3 border-b border-sidebar-border bg-sidebar">
+        <div className="flex items-center gap-2 font-bold text-sidebar-foreground w-full overflow-hidden">
+          <span className="truncate flex-1 group-data-[state=collapsed]:hidden">
+            Financial Analytics
+          </span>
+          <SidebarTrigger className="flex-shrink-0 p-1.5 rounded hover:bg-sidebar-accent/60 transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground [&>svg]:w-4 [&>svg]:h-4" />
         </div>
       </SidebarHeader>
-      
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Core Reports</SidebarGroupLabel>
@@ -77,8 +62,8 @@ export function AppSidebar() {
             <SidebarMenu>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton 
-                    asChild 
+                  <SidebarMenuButton
+                    asChild
                     isActive={location === item.href || (item.href !== "/dashboard" && location.startsWith(item.href))}
                     tooltip={item.name}
                     onClick={() => setOpenMobile(false)}
@@ -100,8 +85,8 @@ export function AppSidebar() {
             <SidebarMenu>
               {customNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton 
-                    asChild 
+                  <SidebarMenuButton
+                    asChild
                     isActive={location === item.href || location.startsWith(item.href)}
                     tooltip={item.name}
                     onClick={() => setOpenMobile(false)}
@@ -142,50 +127,36 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
       </SidebarContent>
-      
-      <SidebarFooter className="border-t border-sidebar-border p-4">
-        <div className="flex items-center gap-3 text-sm text-sidebar-foreground">
-          <Link
-            href="/profile"
-            onClick={() => setOpenMobile(false)}
-            className="w-8 h-8 rounded-full flex-shrink-0 hover:opacity-80 transition-opacity overflow-hidden"
-            title="Account settings"
-          >
-            {user?.imageUrl ? (
-              <img
-                src={user.imageUrl}
-                alt={displayName}
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center font-medium text-sidebar-accent-foreground text-xs">
-                {initials}
-              </div>
-            )}
-          </Link>
-          <div className="flex-1 min-w-0">
-            <p className="font-medium truncate">{displayName}</p>
-            <p className="text-xs text-sidebar-foreground/60 truncate">
-              {user?.primaryEmailAddress?.emailAddress || ""}
-            </p>
-          </div>
-          <Link
-            href="/profile"
-            onClick={() => setOpenMobile(false)}
-            className="p-1.5 rounded hover:bg-sidebar-accent/60 transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground flex-shrink-0"
-            title="Account settings"
-          >
-            <Settings className="w-4 h-4" />
-          </Link>
-          <button
-            type="button"
-            onClick={() => signOut({ redirectUrl: basePath || "/" })}
-            className="p-1.5 rounded hover:bg-sidebar-accent/60 transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground flex-shrink-0"
-            title="Sign out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
+
+      <SidebarFooter className="border-t border-sidebar-border">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip={isDark ? "Light mode" : "Dark mode"}
+              onClick={toggleTheme}
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              <span>{isDark ? "Light mode" : "Dark mode"}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="Account settings">
+              <Link href="/profile" onClick={() => setOpenMobile(false)}>
+                <Settings className="w-4 h-4" />
+                <span>Account settings</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Sign out"
+              onClick={() => signOut({ redirectUrl: basePath || "/" })}
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sign out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );
