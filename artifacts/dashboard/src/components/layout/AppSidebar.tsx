@@ -48,7 +48,7 @@ export function AppSidebar() {
       onMouseEnter={() => { if (!isMobile) setOpen(true); }}
       onMouseLeave={() => { if (!isMobile) setOpen(false); }}
     >
-      <SidebarHeader className="h-16 flex items-center border-b border-sidebar-border bg-sidebar px-0">
+      <SidebarHeader className="h-12 flex items-center justify-center border-b border-sidebar-border bg-sidebar px-0">
         <div className="flex items-center gap-3 font-bold text-sidebar-foreground w-full px-4 group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:px-0">
           <BarChart2 className="w-5 h-5 flex-shrink-0 text-primary" />
           <span className="truncate flex-1 group-data-[state=collapsed]:hidden">
