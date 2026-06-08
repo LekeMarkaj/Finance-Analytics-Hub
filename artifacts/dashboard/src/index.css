@@ -225,6 +225,13 @@
   --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.4);
 }
 
+/* Sidebar overlays content instead of pushing it on desktop */
+@media (min-width: 768px) {
+  [data-slot="sidebar-gap"] {
+    width: var(--sidebar-width-icon) !important;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, ListTree, TrendingUp, PiggyBank, FileSpreadsheet, Database, LogOut, Settings, Users, FileSearch, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, ListTree, TrendingUp, PiggyBank, FileSpreadsheet, Database, LogOut, Settings, Users, FileSearch, Sun, Moon, BarChart2 } from "lucide-react";
 import { useUser, useClerk } from "@clerk/react";
 import {
   Sidebar,
@@ -12,7 +12,6 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useTheme } from "@/hooks/use-theme";
@@ -52,10 +51,10 @@ export function AppSidebar() {
     >
       <SidebarHeader className="h-16 flex items-center px-3 border-b border-sidebar-border bg-sidebar">
         <div className="flex items-center gap-2 font-bold text-sidebar-foreground w-full overflow-hidden">
+          <BarChart2 className="w-5 h-5 flex-shrink-0 text-primary" />
           <span className="truncate flex-1 group-data-[state=collapsed]:hidden">
             Financial Analytics
           </span>
-          <SidebarTrigger className="flex-shrink-0 p-1.5 rounded hover:bg-sidebar-accent/60 transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground [&>svg]:w-4 [&>svg]:h-4" />
         </div>
       </SidebarHeader>
 
