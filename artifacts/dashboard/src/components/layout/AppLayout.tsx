@@ -14,7 +14,7 @@ function MobileTrigger() {
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <AppSidebar />
       <MobileTrigger />
       <SidebarInset className="font-sans">
