@@ -6,7 +6,6 @@ import {
   SidebarContent,
   SidebarHeader,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
@@ -49,8 +48,8 @@ export function AppSidebar() {
       onMouseEnter={() => { if (!isMobile) setOpen(true); }}
       onMouseLeave={() => { if (!isMobile) setOpen(false); }}
     >
-      <SidebarHeader className="h-16 flex items-center px-3 border-b border-sidebar-border bg-sidebar">
-        <div className="flex items-center gap-2 font-bold text-sidebar-foreground w-full overflow-hidden">
+      <SidebarHeader className="h-16 flex items-center border-b border-sidebar-border bg-sidebar px-0">
+        <div className="flex items-center gap-3 font-bold text-sidebar-foreground w-full px-4 group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:px-0">
           <BarChart2 className="w-5 h-5 flex-shrink-0 text-primary" />
           <span className="truncate flex-1 group-data-[state=collapsed]:hidden">
             Financial Analytics
@@ -60,7 +59,6 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Core Reports</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
@@ -83,7 +81,6 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Custom Analysis</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {customNavItems.map((item) => (
@@ -107,7 +104,6 @@ export function AppSidebar() {
 
         {isAdmin && (
           <SidebarGroup>
-            <SidebarGroupLabel>Administration</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {adminNavItems.map((item) => (
