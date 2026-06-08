@@ -6,10 +6,10 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { TrendingUp, Activity, ArrowUpRight } from "lucide-react";
 
 const CHART_COLORS = {
-  blue: "#0079F2",
-  purple: "#795EFF",
-  green: "#009118",
-  red: "#A60808"
+  blue:   "#0079F2",
+  purple: "#6366f1",
+  green:  "#00c2d4",
+  red:    "#818cf8"
 };
 
 function CustomTooltip({ active, payload, label }: any) {

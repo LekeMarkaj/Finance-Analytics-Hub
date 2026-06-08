@@ -17,8 +17,8 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const API = `${BASE}/api`;
 
 const CHART_COLORS = [
-  "#2563eb", "#16a34a", "#dc2626", "#d97706", "#7c3aed",
-  "#0891b2", "#db2777", "#65a30d", "#ea580c", "#6366f1",
+  "#0079F2", "#00c2d4", "#0ea5e9", "#6366f1", "#818cf8",
+  "#38bdf8", "#0284c7", "#4f46e5", "#93c5fd", "#a5b4fc",
 ];
 
 interface ExtractedItem { label: string; value: number; color?: string; }
@@ -288,7 +288,7 @@ function UploadCard({
 
 function StatusBadge({ status }: { status: PdfUpload["status"] }) {
   if (status === "processing") return <Badge variant="secondary" className="text-xs gap-1"><Loader2 className="w-3 h-3 animate-spin" />Processing</Badge>;
-  if (status === "done") return <Badge variant="default" className="text-xs bg-green-600 hover:bg-green-700">Done</Badge>;
+  if (status === "done") return <Badge variant="default" className="text-xs bg-cyan-600 hover:bg-cyan-700">Done</Badge>;
   return <Badge variant="destructive" className="text-xs">Error</Badge>;
 }
 

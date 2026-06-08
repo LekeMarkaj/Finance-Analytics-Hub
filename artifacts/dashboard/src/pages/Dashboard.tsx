@@ -10,24 +10,24 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import Papa from "papaparse";
 
 const CHART_COLORS = {
-  blue: "#0079F2",
-  purple: "#795EFF",
-  green: "#009118",
-  red: "#A60808",
-  pink: "#ec4899",
-  orange: "#f97316",
-  teal: "#14b8a6",
-  cyan: "#06b6d4",
-  indigo: "#6366f1"
+  blue:   "#0079F2",
+  purple: "#6366f1",
+  green:  "#00c2d4",
+  red:    "#0284c7",
+  pink:   "#818cf8",
+  orange: "#0ea5e9",
+  teal:   "#38bdf8",
+  cyan:   "#00c2d4",
+  indigo: "#4f46e5"
 };
 
 const CHART_COLOR_LIST = [
-  CHART_COLORS.blue,
-  CHART_COLORS.purple,
-  CHART_COLORS.green,
-  CHART_COLORS.orange,
-  CHART_COLORS.teal,
-  CHART_COLORS.pink,
+  "#0079F2",
+  "#6366f1",
+  "#00c2d4",
+  "#0ea5e9",
+  "#38bdf8",
+  "#818cf8",
 ];
 
 function CustomTooltip({ active, payload, label }: any) {
@@ -138,7 +138,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="hover-elevate transition-all border-l-4 border-l-orange-500">
+        <Card className="hover-elevate transition-all border-l-4 border-l-cyan-500">
           <CardContent className="p-6">
             {loading ? (
               <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-8 w-32" /></div>
@@ -146,7 +146,7 @@ export default function Dashboard() {
               <>
                 <div className="flex justify-between items-start mb-2">
                   <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Total Spent</p>
-                  <Activity className="w-4 h-4 text-orange-500 opacity-70" />
+                  <Activity className="w-4 h-4 text-cyan-500 opacity-70" />
                 </div>
                 <p className="text-3xl font-bold text-foreground">{formatCompactCurrency(summary?.totalSpent || 0)}</p>
                 <p className="text-xs text-muted-foreground mt-2">
@@ -157,7 +157,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="hover-elevate transition-all border-l-4 border-l-green-500">
+        <Card className="hover-elevate transition-all border-l-4 border-l-sky-500">
           <CardContent className="p-6">
             {loading ? (
               <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-8 w-32" /></div>
@@ -165,7 +165,7 @@ export default function Dashboard() {
               <>
                 <div className="flex justify-between items-start mb-2">
                   <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Utilization Rate</p>
-                  <TrendingUp className="w-4 h-4 text-green-500 opacity-70" />
+                  <TrendingUp className="w-4 h-4 text-sky-500 opacity-70" />
                 </div>
                 <p className="text-3xl font-bold text-foreground">{formatPercent(summary?.overallUtilizationPct || 0)}</p>
                 <p className="text-xs text-muted-foreground mt-2">
