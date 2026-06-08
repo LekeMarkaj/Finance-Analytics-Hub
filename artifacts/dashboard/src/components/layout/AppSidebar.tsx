@@ -66,7 +66,6 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={location === item.href || (item.href !== "/dashboard" && location.startsWith(item.href))}
-                    tooltip={item.name}
                     onClick={() => setOpenMobile(false)}
                   >
                     <Link href={item.href} className="flex items-center gap-3">
@@ -88,7 +87,6 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={location === item.href || location.startsWith(item.href)}
-                    tooltip={item.name}
                     onClick={() => setOpenMobile(false)}
                   >
                     <Link href={item.href} className="flex items-center gap-3">
@@ -111,7 +109,6 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       asChild
                       isActive={location === item.href || location.startsWith(item.href)}
-                      tooltip={item.name}
                       onClick={() => setOpenMobile(false)}
                     >
                       <Link href={item.href} className="flex items-center gap-3">
@@ -131,7 +128,6 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              tooltip={isDark ? "Light mode" : "Dark mode"}
               onClick={toggleTheme}
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -139,7 +135,7 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Account settings">
+            <SidebarMenuButton asChild>
               <Link href="/profile" onClick={() => setOpenMobile(false)}>
                 <Settings className="w-4 h-4" />
                 <span>Account settings</span>
@@ -148,7 +144,6 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
-              tooltip="Sign out"
               onClick={() => signOut({ redirectUrl: basePath || "/" })}
             >
               <LogOut className="w-4 h-4" />
