@@ -45,7 +45,7 @@ export function AppSidebar() {
   const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
   return (
-    <Sidebar collapsible="icon" variant="inset">
+    <Sidebar collapsible="icon">
       <SidebarHeader className="h-16 flex items-center px-3 border-b border-sidebar-border bg-sidebar">
         <div className="flex items-center gap-2 font-bold text-sidebar-foreground w-full overflow-hidden">
           <span className="truncate flex-1 group-data-[state=collapsed]:hidden">
