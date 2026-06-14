@@ -90,28 +90,26 @@ function Avatar() {
 function NameSection() {
   const { user } = useUser();
   const { toast } = useToast();
-  const [firstName, setFirstName] = useState(user?.firstName ?? "");
-  const [lastName, setLastName] = useState(user?.lastName ?? "");
+  const [name, setName] = useState(user?.firstName ?? "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   async function save() {
     setSaving(true);
     try {
-      await user?.update({ firstName: firstName.trim(), lastName: lastName.trim() });
+      await user?.update({ firstName: name.trim() });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
       toast({ title: "Name updated" });
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       toast({ title: "Failed to update name", description: msg, variant: "destructive" });
-      console.error("Name update error:", e);
     } finally {
       setSaving(false);
     }
   }
 
-  const dirty = firstName !== (user?.firstName ?? "") || lastName !== (user?.lastName ?? "");
+  const dirty = name !== (user?.firstName ?? "");
 
   return (
     <Card>
@@ -122,25 +120,15 @@ function NameSection() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="firstName">First name</Label>
-            <Input
-              id="firstName"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="First name"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="lastName">Last name</Label>
-            <Input
-              id="lastName"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Last name"
-            />
-          </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="name">Display name</Label>
+          <Input
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your name"
+            onKeyDown={(e) => e.key === "Enter" && dirty && save()}
+          />
         </div>
         <div className="flex justify-end">
           <Button size="sm" onClick={save} disabled={saving || !dirty} className="gap-2">
