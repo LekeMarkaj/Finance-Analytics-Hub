@@ -17,6 +17,7 @@ export default function PdfUploadPage() {
   const { user } = useUser();
 
   const firstName = user?.firstName || user?.username || "there";
+  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.username || "there";
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -67,7 +68,7 @@ export default function PdfUploadPage() {
       <div className="w-full max-w-lg space-y-8 text-center">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-foreground">
-            Hi {firstName} 👋
+            Hi <span className="text-primary">{fullName}</span>
           </h1>
           <p className="text-muted-foreground text-base leading-relaxed">
             Upload a financial PDF — AI extracts the data and visualises it as interactive charts.
