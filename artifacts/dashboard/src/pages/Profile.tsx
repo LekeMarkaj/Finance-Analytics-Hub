@@ -306,7 +306,7 @@ function PasswordSection() {
 
 export default function Profile() {
   return (
-    <div className="space-y-6 max-w-xl">
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
           <Settings className="w-7 h-7 text-primary" />
@@ -317,14 +317,23 @@ export default function Profile() {
         </p>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <Avatar />
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center gap-6">
+        <div className="w-full max-w-lg">
+          <Card>
+            <CardContent className="pt-6">
+              <Avatar />
+            </CardContent>
+          </Card>
+        </div>
 
-      <EmailSection />
-      <PasswordSection />
+        <div className="w-full max-w-lg">
+          <EmailSection />
+        </div>
+
+        <div className="w-full max-w-lg">
+          <PasswordSection />
+        </div>
+      </div>
     </div>
   );
 }
