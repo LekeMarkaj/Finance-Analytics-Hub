@@ -62,11 +62,9 @@ export default function Profile() {
             cardBox:
               "w-full shadow-none rounded-xl border border-border overflow-hidden bg-card",
             card: "!shadow-none !border-0 !rounded-none bg-card",
-            navbar:
-              "border-r border-border bg-muted/40 !shadow-none",
-            navbarButton:
-              "text-muted-foreground hover:text-foreground hover:bg-accent rounded-md font-medium",
-            navbarButtonIcon: "opacity-70",
+            navbar: "hidden",
+            navbarButton: "hidden",
+            navbarButtonIcon: "hidden",
             pageScrollBox: "p-6 bg-card",
             headerTitle: "text-foreground font-bold text-xl",
             headerSubtitle: "text-muted-foreground text-sm",
