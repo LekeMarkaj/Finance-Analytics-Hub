@@ -102,8 +102,10 @@ function NameSection() {
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
       toast({ title: "Name updated" });
-    } catch {
-      toast({ title: "Failed to update name", variant: "destructive" });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast({ title: "Failed to update name", description: msg, variant: "destructive" });
+      console.error("Name update error:", e);
     } finally {
       setSaving(false);
     }
