@@ -3,12 +3,21 @@ import { useUser } from "@clerk/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Settings, Camera, Loader2, Mail, Lock, Check,
+  Settings, Camera, Loader2, Mail, Lock, Check, User,
 } from "lucide-react";
+
+function useFullName() {
+  const { user } = useUser();
+  const key = user ? `profile_fullname_${user.id}` : null;
+  const stored = key ? (localStorage.getItem(key) ?? "") : "";
+  function save(name: string) {
+    if (key) localStorage.setItem(key, name);
+  }
+  return { stored, save };
+}
 
 function Avatar() {
   const { user } = useUser();
@@ -16,7 +25,10 @@ function Avatar() {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
-  const initials = user?.username?.[0]?.toUpperCase() || "?";
+  const { stored: fullName } = useFullName();
+  const initials = fullName
+    ? fullName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : user?.username?.[0]?.toUpperCase() || "?";
 
   const hasPhoto = !!user?.hasImage && !user.imageUrl?.includes("gravatar");
 
@@ -68,7 +80,7 @@ function Avatar() {
       </div>
       <div>
         <p className="font-semibold text-foreground">
-          {user?.username || "—"}
+          {fullName || user?.username || "—"}
         </p>
         <p className="text-sm text-muted-foreground">
           {user?.primaryEmailAddress?.emailAddress}
@@ -84,6 +96,47 @@ function Avatar() {
   );
 }
 
+
+function FullNameSection() {
+  const { stored, save } = useFullName();
+  const { toast } = useToast();
+  const [name, setName] = useState(stored);
+  const [saved, setSaved] = useState(false);
+
+  function handleSave() {
+    save(name.trim());
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+    toast({ title: "Full name saved" });
+  }
+
+  const dirty = name.trim() !== stored;
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <User className="w-4 h-4 text-muted-foreground" />
+          Full Name
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Your full name"
+          onKeyDown={(e) => e.key === "Enter" && dirty && handleSave()}
+        />
+        <div className="flex justify-end">
+          <Button size="sm" onClick={handleSave} disabled={!dirty} className="gap-2">
+            {saved ? <Check className="w-3.5 h-3.5" /> : null}
+            {saved ? "Saved" : "Save changes"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 function EmailSection() {
   const { user } = useUser();
@@ -324,6 +377,10 @@ export default function Profile() {
               <Avatar />
             </CardContent>
           </Card>
+        </div>
+
+        <div className="w-full max-w-lg">
+          <FullNameSection />
         </div>
 
         <div className="w-full max-w-lg">
