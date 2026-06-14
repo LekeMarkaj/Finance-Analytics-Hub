@@ -16,10 +16,7 @@ function Avatar() {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
-  const initials = [user?.firstName, user?.lastName]
-    .filter(Boolean)
-    .map((n) => n![0].toUpperCase())
-    .join("") || user?.username?.[0]?.toUpperCase() || "?";
+  const initials = user?.username?.[0]?.toUpperCase() || "?";
 
   const hasPhoto = !!user?.hasImage && !user.imageUrl?.includes("gravatar");
 
@@ -71,7 +68,7 @@ function Avatar() {
       </div>
       <div>
         <p className="font-semibold text-foreground">
-          {[user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.username || "—"}
+          {user?.username || "—"}
         </p>
         <p className="text-sm text-muted-foreground">
           {user?.primaryEmailAddress?.emailAddress}
@@ -90,14 +87,14 @@ function Avatar() {
 function NameSection() {
   const { user } = useUser();
   const { toast } = useToast();
-  const [name, setName] = useState(user?.firstName ?? "");
+  const [name, setName] = useState(user?.username ?? "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   async function save() {
     setSaving(true);
     try {
-      await user?.update({ firstName: name.trim() });
+      await user?.update({ username: name.trim() });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
       toast({ title: "Name updated" });
@@ -109,7 +106,7 @@ function NameSection() {
     }
   }
 
-  const dirty = name !== (user?.firstName ?? "");
+  const dirty = name !== (user?.username ?? "");
 
   return (
     <Card>
