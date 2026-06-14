@@ -16,7 +16,8 @@ export default function PdfUploadPage() {
   const [, navigate] = useLocation();
   const { user } = useUser();
 
-  const fullName = user?.username || "there";
+  const storedName = user ? (localStorage.getItem(`profile_fullname_${user.id}`) ?? "") : "";
+  const fullName = storedName || user?.username || "there";
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
