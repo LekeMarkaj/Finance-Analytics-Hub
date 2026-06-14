@@ -42,7 +42,7 @@ function Avatar() {
       <div className="relative">
         <div className="w-20 h-20 rounded-full bg-muted border-2 border-border flex items-center justify-center overflow-hidden">
           {hasPhoto ? (
-            <img src={user!.imageUrl} alt="Profile" className="w-full h-full object-cover filter grayscale" />
+            <img src={user!.imageUrl} alt="Profile" className="w-full h-full object-cover" />
           ) : (
             <span className="text-2xl font-semibold text-muted-foreground select-none">
               {initials}
