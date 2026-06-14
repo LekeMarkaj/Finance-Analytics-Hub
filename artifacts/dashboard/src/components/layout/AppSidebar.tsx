@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, ListTree, TrendingUp, PiggyBank, FileSpreadsheet, Database, LogOut, Settings, Users, FileSearch, Sun, Moon, BarChart2 } from "lucide-react";
+import { LayoutDashboard, FileBarChart2, FileSearch, Database, LogOut, Settings, Users, Sun, Moon, BarChart2 } from "lucide-react";
 import { useUser, useClerk } from "@clerk/react";
 import {
   Sidebar,
@@ -17,15 +17,9 @@ import { useTheme } from "@/hooks/use-theme";
 
 const navItems = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Budget Categories", href: "/categories", icon: ListTree },
-  { name: "Historical Trends", href: "/trends", icon: TrendingUp },
-  { name: "Own Revenues", href: "/revenues", icon: PiggyBank },
-  { name: "Balance Sheet", href: "/balance-sheet", icon: FileSpreadsheet },
-];
-
-const customNavItems = [
-  { name: "Custom Datasets", href: "/custom", icon: Database },
+  { name: "Reports", href: "/reports", icon: FileBarChart2 },
   { name: "PDF Report Analyser", href: "/pdf-upload", icon: FileSearch },
+  { name: "Custom Datasets", href: "/custom", icon: Database },
 ];
 
 const adminNavItems = [
@@ -65,28 +59,10 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
-                    isActive={location === item.href || (item.href !== "/dashboard" && location.startsWith(item.href))}
-                    onClick={() => setOpenMobile(false)}
-                  >
-                    <Link href={item.href} className="flex items-center gap-3">
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.name}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {customNavItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location === item.href || location.startsWith(item.href)}
+                    isActive={
+                      location === item.href ||
+                      (item.href !== "/dashboard" && location.startsWith(item.href))
+                    }
                     onClick={() => setOpenMobile(false)}
                   >
                     <Link href={item.href} className="flex items-center gap-3">
@@ -127,9 +103,7 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={toggleTheme}
-            >
+            <SidebarMenuButton onClick={toggleTheme}>
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               <span>{isDark ? "Light mode" : "Dark mode"}</span>
             </SidebarMenuButton>

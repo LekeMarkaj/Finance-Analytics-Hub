@@ -8,11 +8,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Dashboard from "@/pages/Dashboard";
-import Categories from "@/pages/Categories";
-import CategoryDetail from "@/pages/CategoryDetail";
-import Trends from "@/pages/Trends";
-import Revenues from "@/pages/Revenues";
-import BalanceSheet from "@/pages/BalanceSheet";
+import Reports from "@/pages/Reports";
+import ReportDetail from "@/pages/ReportDetail";
 import CustomDatasets from "@/pages/CustomDatasets";
 import CustomDatasetDetail from "@/pages/CustomDatasetDetail";
 import Profile from "@/pages/Profile";
@@ -127,7 +124,7 @@ function LandingPage() {
             Financial Analytics Dashboard
           </h1>
           <p className="text-lg text-muted-foreground">
-            Secure, personalised financial insights for hospital departments and finance teams. Track budgets, analyse trends, and manage your own custom datasets.
+            Secure, personalised financial insights for hospital departments and finance teams. Upload PDF reports, analyse trends, and explore your financial data.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link href="/sign-up">
@@ -176,20 +173,14 @@ function AppRoutes() {
         <Route path="/dashboard">
           {() => <ProtectedRoute component={Dashboard} />}
         </Route>
-        <Route path="/categories">
-          {() => <ProtectedRoute component={Categories} />}
+        <Route path="/reports">
+          {() => <ProtectedRoute component={Reports} />}
         </Route>
-        <Route path="/categories/:id">
-          {() => <ProtectedRoute component={CategoryDetail} />}
+        <Route path="/reports/:id">
+          {() => <ProtectedRoute component={ReportDetail} />}
         </Route>
-        <Route path="/trends">
-          {() => <ProtectedRoute component={Trends} />}
-        </Route>
-        <Route path="/revenues">
-          {() => <ProtectedRoute component={Revenues} />}
-        </Route>
-        <Route path="/balance-sheet">
-          {() => <ProtectedRoute component={BalanceSheet} />}
+        <Route path="/pdf-upload">
+          {() => <ProtectedRoute component={PdfUpload} />}
         </Route>
         <Route path="/custom">
           {() => <ProtectedRoute component={CustomDatasets} />}
@@ -202,9 +193,6 @@ function AppRoutes() {
         </Route>
         <Route path="/admin/users">
           {() => <ProtectedRoute component={AdminUsers} />}
-        </Route>
-        <Route path="/pdf-upload">
-          {() => <ProtectedRoute component={PdfUpload} />}
         </Route>
         <Route component={NotFound} />
       </Switch>
