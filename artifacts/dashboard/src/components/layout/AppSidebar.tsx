@@ -18,7 +18,7 @@ import { useTheme } from "@/hooks/use-theme";
 const navItems = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { name: "Reports", href: "/reports", icon: FileBarChart2 },
-  { name: "PDF Report Analyser", href: "/pdf-upload", icon: FileSearch },
+  { name: "Home", href: "/pdf-upload", icon: FileSearch },
   { name: "Custom Datasets", href: "/custom", icon: Database },
 ];
 
