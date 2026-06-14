@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Settings, Camera, Loader2, User, Mail, Lock, Check,
+  Settings, Camera, Loader2, Mail, Lock, Check,
 } from "lucide-react";
 
 function Avatar() {
@@ -84,58 +84,6 @@ function Avatar() {
   );
 }
 
-function NameSection() {
-  const { user } = useUser();
-  const { toast } = useToast();
-  const [name, setName] = useState(user?.username ?? "");
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  async function save() {
-    setSaving(true);
-    try {
-      await user?.update({ username: name.trim() });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-      toast({ title: "Name updated" });
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      toast({ title: "Failed to update name", description: msg, variant: "destructive" });
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  const dirty = name !== (user?.username ?? "");
-
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <User className="w-4 h-4 text-muted-foreground" />
-          Name
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-1.5">
-          <Input
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your name"
-            onKeyDown={(e) => e.key === "Enter" && dirty && save()}
-          />
-        </div>
-        <div className="flex justify-end">
-          <Button size="sm" onClick={save} disabled={saving || !dirty} className="gap-2">
-            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : saved ? <Check className="w-3.5 h-3.5" /> : null}
-            {saved ? "Saved" : "Save changes"}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
 function EmailSection() {
   const { user } = useUser();
@@ -375,7 +323,6 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-      <NameSection />
       <EmailSection />
       <PasswordSection />
     </div>
