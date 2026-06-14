@@ -121,7 +121,6 @@ function NameSection() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="name">Display name</Label>
           <Input
             id="name"
             value={name}
