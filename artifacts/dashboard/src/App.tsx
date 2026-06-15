@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ClerkProvider, SignIn, SignUp, Show, useClerk } from "@clerk/react";
+import { ClerkProvider, SignIn, SignUp, Show, useClerk, useAuth } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { shadcn } from "@clerk/themes";
 import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from "wouter";
@@ -18,6 +18,7 @@ import PdfUpload from "@/pages/PdfUpload";
 import NotFound from "@/pages/not-found";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -154,6 +155,14 @@ function HomeRoute() {
 }
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+  const { isLoaded } = useAuth();
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
   return (
     <>
       <Show when="signed-in">
