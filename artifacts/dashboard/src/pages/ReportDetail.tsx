@@ -1,4 +1,4 @@
-import { useParams, useLocation } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +21,8 @@ function StatusBadge({ status }: { status: PdfUpload["status"] }) {
 }
 
 export default function ReportDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const [, params] = useRoute<{ id: string }>("/reports/:id");
+  const id = params?.id;
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();

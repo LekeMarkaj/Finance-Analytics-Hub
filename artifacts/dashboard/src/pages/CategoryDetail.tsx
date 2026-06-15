@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "wouter";
+import { useRoute, Link } from "wouter";
 import { useGetBudgetCategory, useListBudgetLineItems, useCreateBudgetLineItem, useUpdateBudgetLineItem, useDeleteBudgetLineItem } from "@workspace/api-client-react";
 import { formatCurrency, formatPercent } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -14,8 +14,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Trash2, Edit, Plus, ArrowLeft } from "lucide-react";
 
 export default function CategoryDetail() {
-  const { id } = useParams();
-  const categoryId = parseInt(id || "0", 10);
+  const [, params] = useRoute<{ id: string }>("/categories/:id");
+  const categoryId = parseInt(params?.id || "0", 10);
   
   const categoryQuery = useGetBudgetCategory(categoryId, { query: { enabled: !!categoryId, queryKey: ['category', categoryId] } });
   const itemsQuery = useListBudgetLineItems({ categoryId }, { query: { enabled: !!categoryId, queryKey: ['lineItems', categoryId] } });
