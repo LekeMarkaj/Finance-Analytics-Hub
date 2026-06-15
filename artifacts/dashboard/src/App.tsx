@@ -155,7 +155,7 @@ function HomeRoute() {
 }
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const { isLoaded } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -163,16 +163,10 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
       </div>
     );
   }
-  return (
-    <>
-      <Show when="signed-in">
-        <Component />
-      </Show>
-      <Show when="signed-out">
-        <Redirect to="/sign-in" />
-      </Show>
-    </>
-  );
+  if (!isSignedIn) {
+    return <Redirect to="/sign-in" />;
+  }
+  return <Component />;
 }
 
 function AppRoutes() {
