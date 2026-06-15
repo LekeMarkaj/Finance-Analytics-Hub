@@ -154,11 +154,13 @@ function HomeRoute() {
   );
 }
 
-function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+function AppShell() {
+  const [location] = useLocation();
   const { isLoaded, isSignedIn } = useAuth();
+
   if (!isLoaded) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -166,41 +168,19 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   if (!isSignedIn) {
     return <Redirect to="/sign-in" />;
   }
-  return <Component />;
-}
 
-function AppRoutes() {
-  return (
-    <AppLayout>
-      <Switch>
-        <Route path="/dashboard">
-          {() => <ProtectedRoute component={Dashboard} />}
-        </Route>
-        <Route path="/reports">
-          {() => <ProtectedRoute component={Reports} />}
-        </Route>
-        <Route path="/reports/:id">
-          {() => <ProtectedRoute component={ReportDetail} />}
-        </Route>
-        <Route path="/pdf-upload">
-          {() => <ProtectedRoute component={PdfUpload} />}
-        </Route>
-        <Route path="/custom">
-          {() => <ProtectedRoute component={CustomDatasets} />}
-        </Route>
-        <Route path="/custom/:id">
-          {() => <ProtectedRoute component={CustomDatasetDetail} />}
-        </Route>
-        <Route path="/profile/*?">
-          {() => <ProtectedRoute component={Profile} />}
-        </Route>
-        <Route path="/admin/users">
-          {() => <ProtectedRoute component={AdminUsers} />}
-        </Route>
-        <Route component={NotFound} />
-      </Switch>
-    </AppLayout>
-  );
+  let page: React.ReactNode;
+  if (location === "/dashboard") page = <Dashboard />;
+  else if (location === "/reports") page = <Reports />;
+  else if (location.startsWith("/reports/")) page = <ReportDetail />;
+  else if (location === "/pdf-upload") page = <PdfUpload />;
+  else if (location === "/custom") page = <CustomDatasets />;
+  else if (location.startsWith("/custom/")) page = <CustomDatasetDetail />;
+  else if (location.startsWith("/profile")) page = <Profile />;
+  else if (location === "/admin/users") page = <AdminUsers />;
+  else page = <NotFound />;
+
+  return <AppLayout>{page}</AppLayout>;
 }
 
 function SignInPage() {
@@ -272,7 +252,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/" component={HomeRoute} />
             <Route path="/sign-in/*?" component={SignInPage} />
             <Route path="/sign-up/*?" component={SignUpPage} />
-            <Route path="/:rest*" component={AppRoutes} />
+            <Route component={AppShell} />
           </Switch>
           <Toaster />
         </TooltipProvider>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useRoute, Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useGetCustomDataset, useListCustomDataRows, useCreateCustomDataRow, useUpdateCustomDataRow, useDeleteCustomDataRow, useUpdateCustomDataset } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -46,8 +46,8 @@ function CustomTooltip({ active, payload, label, yLabel }: any) {
 }
 
 export default function CustomDatasetDetail() {
-  const [, params] = useRoute<{ id: string }>("/custom/:id");
-  const datasetId = parseInt(params?.id || "0", 10);
+  const [location] = useLocation();
+  const datasetId = parseInt(location.split("/")[2] || "0", 10);
   
   const queryClient = useQueryClient();
   const datasetQuery = useGetCustomDataset(datasetId, { query: { enabled: !!datasetId, queryKey: ['customDataset', datasetId] } });
