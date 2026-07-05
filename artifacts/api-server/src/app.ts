@@ -10,6 +10,7 @@ import {
 } from "./middlewares/clerkProxyMiddleware";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { WebhookHandlers } from "./webhookHandlers";
 
 const app: Express = express();
 
@@ -34,6 +35,39 @@ app.use(
 );
 
 app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
+
+// Register Stripe webhook route BEFORE express.json() -- it needs the raw Buffer body.
+app.post(
+  "/api/stripe/webhook",
+  cors({ credentials: true, origin: true }),
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    const signature = req.headers["stripe-signature"];
+
+    if (!signature) {
+      res.status(400).json({ error: "Missing stripe-signature" });
+      return;
+    }
+
+    try {
+      const sig = Array.isArray(signature) ? signature[0] : signature;
+
+      if (!Buffer.isBuffer(req.body)) {
+        logger.error(
+          "STRIPE WEBHOOK ERROR: req.body is not a Buffer. Ensure this route is registered before express.json().",
+        );
+        res.status(500).json({ error: "Webhook processing error" });
+        return;
+      }
+
+      await WebhookHandlers.processWebhook(req.body as Buffer, sig);
+      res.status(200).json({ received: true });
+    } catch (err) {
+      logger.error({ err }, "Stripe webhook error");
+      res.status(400).json({ error: "Webhook processing error" });
+    }
+  },
+);
 
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json());

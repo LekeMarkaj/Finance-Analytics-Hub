@@ -1,10 +1,13 @@
 import { useRef, useCallback, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
+import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/hooks/use-toast";
 import { FileUp, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { API } from "@/lib/reports";
+import type { ApiError } from "@/lib/reports";
 
 interface PdfUploadDropzoneProps {
   onSuccess?: (data: { id: number }) => void;
@@ -16,6 +19,7 @@ export default function PdfUploadDropzone({ onSuccess, className }: PdfUploadDro
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [, navigate] = useLocation();
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -28,7 +32,9 @@ export default function PdfUploadDropzone({ onSuccess, className }: PdfUploadDro
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.error ?? `HTTP ${res.status}`);
+        const err: ApiError = new Error(body.error ?? `HTTP ${res.status}`);
+        if (body.code) err.code = body.code;
+        throw err;
       }
       return res.json() as Promise<{ id: number }>;
     },
@@ -37,7 +43,20 @@ export default function PdfUploadDropzone({ onSuccess, className }: PdfUploadDro
       toast({ title: "PDF uploaded", description: "AI is extracting financial data \u2014 taking you to your report." });
       onSuccess?.(data);
     },
-    onError: (err: Error) => {
+    onError: (err: ApiError) => {
+      if (err.code === "QUOTA_EXCEEDED") {
+        toast({
+          title: "Upload limit reached",
+          description: err.message,
+          variant: "destructive",
+          action: (
+            <ToastAction altText="Upgrade" onClick={() => navigate("/profile")}>
+              Upgrade
+            </ToastAction>
+          ),
+        });
+        return;
+      }
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
     },
   });

@@ -25,7 +25,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Search, Trash2, Loader2, FileBarChart2, Upload, AlertCircle, BarChart3, MoreVertical, Link2, Plus, X, Globe, Lock } from "lucide-react";
 import { format } from "date-fns";
-import { apiFetch, type PdfUpload } from "@/lib/reports";
+import { apiFetch, type PdfUpload, type ApiError } from "@/lib/reports";
+import { ToastAction } from "@/components/ui/toast";
 
 const STATUS_COLORS = ["#0079F2", "#00c2d4", "#6366f1", "#0ea5e9", "#38bdf8", "#818cf8"];
 
@@ -198,7 +199,21 @@ function CreateReportDialog({ open, onOpenChange }: { open: boolean; onOpenChang
       setTitle("");
       navigate(`/reports/${report.id}`);
     },
-    onError: (err: Error) => {
+    onError: (err: ApiError) => {
+      if (err.code === "QUOTA_EXCEEDED") {
+        onOpenChange(false);
+        toast({
+          title: "Report limit reached",
+          description: err.message,
+          variant: "destructive",
+          action: (
+            <ToastAction altText="Upgrade" onClick={() => navigate("/profile")}>
+              Upgrade
+            </ToastAction>
+          ),
+        });
+        return;
+      }
       toast({ title: "Could not create report", description: err.message, variant: "destructive" });
     },
   });

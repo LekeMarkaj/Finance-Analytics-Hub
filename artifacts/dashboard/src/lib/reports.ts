@@ -21,11 +21,23 @@ export interface PdfUpload {
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 export const API = `${BASE}/api`;
 
+export interface ApiError extends Error {
+  code?: string;
+  tier?: string;
+  limit?: number;
+  used?: number;
+}
+
 export async function apiFetch(path: string, opts?: RequestInit) {
   const res = await fetch(`${API}${path}`, { credentials: "include", ...opts });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error ?? `HTTP ${res.status}`);
+    const err: ApiError = new Error(body.error ?? `HTTP ${res.status}`);
+    if (body.code) err.code = body.code;
+    if (body.tier) err.tier = body.tier;
+    if (typeof body.limit === "number") err.limit = body.limit;
+    if (typeof body.used === "number") err.used = body.used;
+    throw err;
   }
   if (res.status === 204) return null;
   return res.json();

@@ -3,3 +3,5 @@
 - [lib/db composite project rebuild](lib-db-composite-build.md) — after editing `lib/db` schema files, run `tsc -b --force` there or dependents see stale dist/types.
 - [Removing an OpenAPI-backed feature](openapi-feature-removal.md) — deleting a feature also requires trimming its paths/schemas from lib/api-spec/openapi.yaml, rerunning orval codegen, and force-rebuilding (rm -rf dist + tsc -b --force) generated lib dist folders, since tsc -b doesn't prune stale output files for deleted sources.
 - [Public share-link auth bypass](public-share-links-auth-bypass.md) — pattern for letting anonymous users view one resource read-only via link in an app that otherwise requires sign-in for every route.
+- [Stripe connector settings field names](stripe-connector-settings.md) — Replit-managed Stripe connection exposes `secret`/`publishable`, not `secret_key`/`webhook_secret`.
+- [stripe-replit-sync runMigrations schema quirk](stripe-replit-sync-migrations.md) — `schema` option is silently ignored; schema is hardcoded to `"stripe"`.

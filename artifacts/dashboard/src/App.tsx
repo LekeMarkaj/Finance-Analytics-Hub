@@ -15,6 +15,7 @@ import AdminUsers from "@/pages/AdminUsers";
 import PdfUpload from "@/pages/PdfUpload";
 import NotFound from "@/pages/not-found";
 import { Button } from "@/components/ui/button";
+import PricingCards from "@/components/PricingCards";
 import { Link } from "wouter";
 import { Loader2, BarChart2 } from "lucide-react";
 
@@ -132,6 +133,15 @@ function LandingPage() {
           </div>
         </div>
       </main>
+      <section className="border-t border-border px-6 py-16 bg-muted/30">
+        <div className="max-w-5xl mx-auto space-y-10">
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-bold text-foreground">Simple, transparent pricing</h2>
+            <p className="text-muted-foreground">Start for free, upgrade whenever you need more reports.</p>
+          </div>
+          <PricingCards />
+        </div>
+      </section>
     </div>
   );
 }

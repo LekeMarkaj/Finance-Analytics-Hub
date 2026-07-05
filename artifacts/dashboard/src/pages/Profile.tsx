@@ -1,14 +1,136 @@
 import { useState, useRef } from "react";
 import { useUser } from "@clerk/react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { apiFetch } from "@/lib/reports";
+import PricingCards from "@/components/PricingCards";
 import {
-  Settings, Camera, Loader2, Mail, Lock, Check, User,
+  Settings, Camera, Loader2, Mail, Lock, Check, User, CreditCard, ExternalLink,
 } from "lucide-react";
+
+interface UserPlan {
+  tier: "free" | "basic" | "pro";
+  interval: "month" | "year" | null;
+  limits: { creates: number; uploads: number };
+  subscriptionId: string | null;
+  currentPeriodEnd: number | null;
+}
+
+interface BillingMe {
+  plan: UserPlan;
+  usage: { creates: number; uploads: number };
+}
+
+const TIER_LABELS: Record<UserPlan["tier"], string> = {
+  free: "Free",
+  basic: "Basic",
+  pro: "Pro",
+};
+
+function UsageBar({ label, used, limit }: { label: string; used: number; limit: number }) {
+  const pct = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0;
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-foreground">{label}</span>
+        <span className="text-muted-foreground">{used} / {limit} this month</span>
+      </div>
+      <Progress value={pct} />
+    </div>
+  );
+}
+
+function PlanUsageSection() {
+  const { toast } = useToast();
+  const [showPlans, setShowPlans] = useState(false);
+
+  const { data, isLoading } = useQuery<BillingMe>({
+    queryKey: ["billingMe"],
+    queryFn: () => apiFetch("/billing/me"),
+  });
+
+  const portalMutation = useMutation({
+    mutationFn: () => apiFetch("/billing/portal", { method: "POST" }),
+    onSuccess: (res: { url: string }) => {
+      window.location.href = res.url;
+    },
+    onError: (err: Error) => {
+      toast({ title: "Could not open billing portal", description: err.message, variant: "destructive" });
+    },
+  });
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <CreditCard className="w-4 h-4 text-muted-foreground" />
+          Plan & Usage
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        {isLoading || !data ? (
+          <div className="flex justify-center py-6">
+            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Badge className="text-sm">{TIER_LABELS[data.plan.tier]}</Badge>
+                {data.plan.interval && (
+                  <span className="text-xs text-muted-foreground">billed {data.plan.interval === "month" ? "monthly" : "yearly"}</span>
+                )}
+              </div>
+              {data.plan.tier !== "free" ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => portalMutation.mutate()}
+                  disabled={portalMutation.isPending}
+                >
+                  {portalMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ExternalLink className="w-3.5 h-3.5" />}
+                  Manage billing
+                </Button>
+              ) : (
+                <Button size="sm" onClick={() => setShowPlans((v) => !v)}>
+                  Upgrade
+                </Button>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <UsageBar label="Report creations" used={data.usage.creates} limit={data.plan.limits.creates} />
+              <UsageBar label="PDF uploads" used={data.usage.uploads} limit={data.plan.limits.uploads} />
+            </div>
+
+            {data.plan.tier !== "free" && (
+              <button
+                className="text-xs text-primary hover:underline"
+                onClick={() => setShowPlans((v) => !v)}
+              >
+                {showPlans ? "Hide plans" : "View all plans"}
+              </button>
+            )}
+
+            {showPlans && (
+              <div className="pt-2">
+                <PricingCards currentTier={data.plan.tier} />
+              </div>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 function useFullName() {
   const { user } = useUser();
@@ -378,6 +500,10 @@ export default function Profile() {
               <Avatar />
             </CardContent>
           </Card>
+        </div>
+
+        <div className="w-full max-w-3xl">
+          <PlanUsageSection />
         </div>
 
         <div className="w-full max-w-lg">

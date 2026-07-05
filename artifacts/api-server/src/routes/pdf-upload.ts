@@ -2,11 +2,12 @@ import { Router } from "express";
 import multer from "multer";
 import { extractText } from "unpdf";
 import Groq from "groq-sdk";
-import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
 import { pdfUploadsTable } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
 import type { ExtractedFinancialData } from "@workspace/db";
+import { requireAuth, optionalAuth } from "../middlewares/auth";
+import { checkAndIncrementUsage } from "../lib/billing";
 
 const router = Router();
 
@@ -23,24 +24,6 @@ const upload = multer({
 });
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-function requireAuth(req: any, res: any, next: any) {
-  const auth = getAuth(req);
-  const userId = auth?.sessionClaims?.userId || auth?.userId;
-  if (!userId) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
-  req.userId = userId;
-  next();
-}
-
-function optionalAuth(req: any, _res: any, next: any) {
-  const auth = getAuth(req);
-  const userId = auth?.sessionClaims?.userId || auth?.userId;
-  req.userId = userId || null;
-  next();
-}
 
 router.post(
   "/pdf-upload",
@@ -61,6 +44,18 @@ router.post(
   async (req: any, res: any): Promise<void> => {
     if (!req.file) {
       res.status(400).json({ error: "No file uploaded" });
+      return;
+    }
+
+    const usage = await checkAndIncrementUsage(req.userId, "uploads");
+    if (!usage.allowed) {
+      res.status(403).json({
+        error: `You've reached your ${usage.tier} plan's upload limit (${usage.limit}/mo). Upgrade your plan to upload more.`,
+        code: "QUOTA_EXCEEDED",
+        tier: usage.tier,
+        limit: usage.limit,
+        used: usage.used,
+      });
       return;
     }
 
@@ -153,6 +148,18 @@ router.post("/pdf-uploads/manual", requireAuth, async (req: any, res: any): Prom
   const title = typeof req.body?.title === "string" ? req.body.title.trim() : "";
   if (!title) {
     res.status(400).json({ error: "Title is required" });
+    return;
+  }
+
+  const usage = await checkAndIncrementUsage(req.userId, "creates");
+  if (!usage.allowed) {
+    res.status(403).json({
+      error: `You've reached your ${usage.tier} plan's report creation limit (${usage.limit}/mo). Upgrade your plan to create more reports.`,
+      code: "QUOTA_EXCEEDED",
+      tier: usage.tier,
+      limit: usage.limit,
+      used: usage.used,
+    });
     return;
   }
 

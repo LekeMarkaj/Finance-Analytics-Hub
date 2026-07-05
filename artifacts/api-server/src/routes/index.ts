@@ -8,6 +8,7 @@ import balanceSheetRouter from "./balance-sheet";
 import summaryRouter from "./summary";
 import adminUsersRouter from "./admin-users";
 import pdfUploadRouter from "./pdf-upload";
+import billingRouter from "./billing";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(balanceSheetRouter);
 router.use(summaryRouter);
 router.use(adminUsersRouter);
 router.use(pdfUploadRouter);
+router.use(billingRouter);
 
 export default router;
