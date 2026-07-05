@@ -11,8 +11,6 @@ import { FileText, Search, Trash2, Loader2, FileBarChart2, Upload, AlertCircle, 
 import { format } from "date-fns";
 import { apiFetch, type PdfUpload } from "@/lib/reports";
 
-type StatusFilter = "all" | "done" | "processing" | "error";
-
 const STATUS_COLORS = ["#0079F2", "#00c2d4", "#6366f1", "#0ea5e9", "#38bdf8", "#818cf8"];
 
 function reportGradient(id: number) {
@@ -36,7 +34,6 @@ function ReportCard({ upload, onDelete, deleting }: {
   deleting: boolean;
 }) {
   const title = upload.extractedData?.title || upload.fileName.replace(/\.pdf$/i, "");
-  const summary = upload.extractedData?.summary;
   const sectionCount = upload.extractedData?.sections?.length ?? 0;
 
   return (
@@ -78,9 +75,6 @@ function ReportCard({ upload, onDelete, deleting }: {
             <span>·</span>
             <span>{format(new Date(upload.createdAt), "MMM d, yyyy")}</span>
           </div>
-          {summary && (
-            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{summary}</p>
-          )}
         </CardContent>
       </Card>
     </Link>
@@ -89,7 +83,6 @@ function ReportCard({ upload, onDelete, deleting }: {
 
 export default function ReportsPage() {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -115,18 +108,9 @@ export default function ReportsPage() {
   });
 
   const filtered = (uploads ?? []).filter((u) => {
-    const matchStatus = statusFilter === "all" || u.status === statusFilter;
     const title = u.extractedData?.title || u.fileName;
-    const matchSearch = title.toLowerCase().includes(search.toLowerCase());
-    return matchStatus && matchSearch;
+    return title.toLowerCase().includes(search.toLowerCase());
   });
-
-  const statusCounts = {
-    all: uploads?.length ?? 0,
-    done: uploads?.filter((u) => u.status === "done").length ?? 0,
-    processing: uploads?.filter((u) => u.status === "processing").length ?? 0,
-    error: uploads?.filter((u) => u.status === "error").length ?? 0,
-  };
 
   return (
     <div className="space-y-6">
@@ -146,32 +130,14 @@ export default function ReportsPage() {
         </Link>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search reports…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <div className="flex items-center gap-1 bg-muted/60 rounded-md p-1 w-fit">
-          {(["all", "done", "processing", "error"] as StatusFilter[]).map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1 rounded text-xs font-medium transition-colors capitalize ${
-                statusFilter === s
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
-              <span className="ml-1 opacity-60">({statusCounts[s]})</span>
-            </button>
-          ))}
-        </div>
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          placeholder="Search reports…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9"
+        />
       </div>
 
       {isLoading ? (
@@ -193,15 +159,15 @@ export default function ReportsPage() {
           </div>
           <div>
             <p className="font-medium text-foreground">
-              {search || statusFilter !== "all" ? "No matching reports" : "No reports yet"}
+              {search ? "No matching reports" : "No reports yet"}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              {search || statusFilter !== "all"
-                ? "Try adjusting your search or filter."
+              {search
+                ? "Try adjusting your search."
                 : "Upload a PDF report to get started."}
             </p>
           </div>
-          {!search && statusFilter === "all" && (
+          {!search && (
             <Link href="/pdf-upload">
               <Button variant="outline" className="gap-2 mt-2">
                 <Upload className="w-4 h-4" />
