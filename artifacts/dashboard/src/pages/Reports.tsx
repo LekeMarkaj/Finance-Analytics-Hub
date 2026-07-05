@@ -158,9 +158,13 @@ function ReportCard({ upload, onDelete, deleting }: {
             </DropdownMenu>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <StatusBadge status={upload.status} />
-            <span>·</span>
             <span>{format(new Date(upload.createdAt), "MMM d, yyyy")}</span>
+            {upload.status !== "done" && (
+              <>
+                <span>·</span>
+                <StatusBadge status={upload.status} />
+              </>
+            )}
             {upload.isPublic && (
               <>
                 <span>·</span>
