@@ -2,3 +2,4 @@
 - [Clerk test user id for DB-seeded e2e tests](clerk-test-userid.md) — no `/api/me`; drive tests through the real create flow instead of guessing userId to pre-seed rows.
 - [lib/db composite project rebuild](lib-db-composite-build.md) — after editing `lib/db` schema files, run `tsc -b --force` there or dependents see stale dist/types.
 - [Removing an OpenAPI-backed feature](openapi-feature-removal.md) — deleting a feature also requires trimming its paths/schemas from lib/api-spec/openapi.yaml, rerunning orval codegen, and force-rebuilding (rm -rf dist + tsc -b --force) generated lib dist folders, since tsc -b doesn't prune stale output files for deleted sources.
+- [Public share-link auth bypass](public-share-links-auth-bypass.md) — pattern for letting anonymous users view one resource read-only via link in an app that otherwise requires sign-in for every route.

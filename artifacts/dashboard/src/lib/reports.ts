@@ -12,6 +12,8 @@ export interface PdfUpload {
   status: "processing" | "done" | "error";
   errorMessage?: string;
   extractedData?: ExtractedData;
+  isPublic: boolean;
+  isOwner?: boolean;
   createdAt: string;
   updatedAt: string;
 }

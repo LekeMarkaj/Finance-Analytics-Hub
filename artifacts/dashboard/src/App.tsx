@@ -152,6 +152,10 @@ function HomeRoute() {
   );
 }
 
+function isPublicReportPath(location: string): boolean {
+  return /^\/reports\/[^/]+$/.test(location);
+}
+
 function AppShell() {
   const [location] = useLocation();
   const { isLoaded, isSignedIn } = useAuth();
@@ -164,6 +168,17 @@ function AppShell() {
     );
   }
   if (!isSignedIn) {
+    if (isPublicReportPath(location)) {
+      return (
+        <div className="min-h-screen bg-background font-sans">
+          <div className="p-4 md:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto w-full">
+              <ReportDetail />
+            </div>
+          </div>
+        </div>
+      );
+    }
     return <Redirect to="/sign-in" />;
   }
 

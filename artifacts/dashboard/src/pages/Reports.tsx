@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Search, Trash2, Loader2, FileBarChart2, Upload, AlertCircle, BarChart3, MoreVertical, Link2, Plus, X } from "lucide-react";
+import { FileText, Search, Trash2, Loader2, FileBarChart2, Upload, AlertCircle, BarChart3, MoreVertical, Link2, Plus, X, Globe, Lock } from "lucide-react";
 import { format } from "date-fns";
 import { apiFetch, type PdfUpload } from "@/lib/reports";
 
@@ -52,6 +52,24 @@ function ReportCard({ upload, onDelete, deleting }: {
   const title = upload.extractedData?.title || upload.fileName.replace(/\.pdf$/i, "");
   const sectionCount = upload.extractedData?.sections?.length ?? 0;
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const visibilityMutation = useMutation({
+    mutationFn: (isPublic: boolean) =>
+      apiFetch(`/pdf-uploads/${upload.id}/visibility`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPublic }),
+      }),
+    onSuccess: (updated: PdfUpload) => {
+      queryClient.invalidateQueries({ queryKey: ["pdfUploads"] });
+      queryClient.setQueryData(["pdfUpload", String(upload.id)], updated);
+      toast({ title: updated.isPublic ? "Report is now public" : "Report is now private" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Could not update visibility", description: err.message, variant: "destructive" });
+    },
+  });
 
   const handleCopyLink = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -60,6 +78,12 @@ function ReportCard({ upload, onDelete, deleting }: {
     navigator.clipboard.writeText(url).then(() => {
       toast({ title: "Link copied" });
     });
+  };
+
+  const handleToggleVisibility = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    visibilityMutation.mutate(!upload.isPublic);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -103,10 +127,24 @@ function ReportCard({ upload, onDelete, deleting }: {
                   <MoreVertical className="w-3.5 h-3.5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuContent align="end" className="w-44">
                 <DropdownMenuItem onClick={handleCopyLink} className="gap-2 cursor-pointer">
                   <Link2 className="w-4 h-4" />
                   Copy link
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleToggleVisibility}
+                  disabled={visibilityMutation.isPending}
+                  className="gap-2 cursor-pointer"
+                >
+                  {visibilityMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : upload.isPublic ? (
+                    <Lock className="w-4 h-4" />
+                  ) : (
+                    <Globe className="w-4 h-4" />
+                  )}
+                  {upload.isPublic ? "Make private" : "Make public"}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleDelete}
@@ -123,6 +161,14 @@ function ReportCard({ upload, onDelete, deleting }: {
             <StatusBadge status={upload.status} />
             <span>·</span>
             <span>{format(new Date(upload.createdAt), "MMM d, yyyy")}</span>
+            {upload.isPublic && (
+              <>
+                <span>·</span>
+                <span className="flex items-center gap-1 text-primary">
+                  <Globe className="w-3 h-3" />Public
+                </span>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>

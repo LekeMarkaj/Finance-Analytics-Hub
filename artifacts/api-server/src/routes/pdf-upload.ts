@@ -35,6 +35,13 @@ function requireAuth(req: any, res: any, next: any) {
   next();
 }
 
+function optionalAuth(req: any, _res: any, next: any) {
+  const auth = getAuth(req);
+  const userId = auth?.sessionClaims?.userId || auth?.userId;
+  req.userId = userId || null;
+  next();
+}
+
 router.post(
   "/pdf-upload",
   requireAuth,
@@ -178,17 +185,43 @@ router.get("/pdf-uploads", requireAuth, async (req: any, res: any): Promise<void
   res.json(rows.map(uploadToApi));
 });
 
-router.get("/pdf-uploads/:id", requireAuth, async (req: any, res: any): Promise<void> => {
+router.get("/pdf-uploads/:id", optionalAuth, async (req: any, res: any): Promise<void> => {
   const id = Number(req.params.id);
   const [row] = await db
     .select()
     .from(pdfUploadsTable)
-    .where(and(eq(pdfUploadsTable.id, id), eq(pdfUploadsTable.userId, req.userId)));
+    .where(eq(pdfUploadsTable.id, id));
+
+  const isOwner = !!row && !!req.userId && row.userId === req.userId;
+
+  if (!row || (!isOwner && !row.isPublic)) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
+
+  res.json({ ...uploadToApi(row), isOwner });
+});
+
+router.patch("/pdf-uploads/:id/visibility", requireAuth, async (req: any, res: any): Promise<void> => {
+  const id = Number(req.params.id);
+  const isPublic = req.body?.isPublic;
+
+  if (typeof isPublic !== "boolean") {
+    res.status(400).json({ error: "isPublic must be a boolean" });
+    return;
+  }
+
+  const [row] = await db
+    .update(pdfUploadsTable)
+    .set({ isPublic, updatedAt: new Date() })
+    .where(and(eq(pdfUploadsTable.id, id), eq(pdfUploadsTable.userId, req.userId)))
+    .returning();
+
   if (!row) {
     res.status(404).json({ error: "Not found" });
     return;
   }
-  res.json(uploadToApi(row));
+  res.json({ ...uploadToApi(row), isOwner: true });
 });
 
 router.patch("/pdf-uploads/:id", requireAuth, async (req: any, res: any): Promise<void> => {
@@ -247,6 +280,7 @@ function uploadToApi(row: typeof pdfUploadsTable.$inferSelect) {
     status: row.status,
     errorMessage: row.errorMessage,
     extractedData: row.extractedData,
+    isPublic: row.isPublic,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

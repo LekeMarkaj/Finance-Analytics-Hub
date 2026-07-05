@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -9,6 +9,7 @@ export const pdfUploadsTable = pgTable("pdf_uploads", {
   status: text("status", { enum: ["processing", "done", "error"] }).notNull().default("processing"),
   errorMessage: text("error_message"),
   extractedData: jsonb("extracted_data"),
+  isPublic: boolean("is_public").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

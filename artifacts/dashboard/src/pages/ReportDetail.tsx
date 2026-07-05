@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Trash2, Loader2, AlertCircle, FileText, Pencil, Plus, X, Check } from "lucide-react";
+import { ArrowLeft, Trash2, Loader2, AlertCircle, FileText, Pencil, Plus, X, Check, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { apiFetch, type PdfUpload, type ExtractedSection } from "@/lib/reports";
 import { SectionChart } from "@/components/SectionChart";
@@ -110,6 +110,7 @@ export default function ReportDetailPage() {
 
   const title = report.extractedData?.title || report.fileName.replace(/\.pdf$/i, "");
   const hasSections = sections.length > 0;
+  const isReadOnly = report.isOwner === false;
 
   const startEditing = () => {
     setSections(report.extractedData?.sections ?? []);
@@ -182,35 +183,43 @@ export default function ReportDetailPage() {
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              {report.status === "done" && (
-                isEditing ? (
-                  <>
-                    <Button variant="outline" size="sm" className="gap-2" data-testid="button-cancel-edit" onClick={cancelEditing} disabled={saveMutation.isPending}>
-                      <X className="w-4 h-4" />Cancel
-                    </Button>
-                    <Button size="sm" className="gap-2" data-testid="button-save-changes" onClick={() => saveMutation.mutate(sections)} disabled={saveMutation.isPending}>
-                      {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                      Save changes
-                    </Button>
-                  </>
-                ) : (
-                  <Button variant="outline" size="sm" className="gap-2" data-testid="button-edit" onClick={startEditing}>
-                    <Pencil className="w-4 h-4" />Edit
+              {isReadOnly ? (
+                <Badge variant="secondary" className="gap-1.5 text-xs">
+                  <Eye className="w-3.5 h-3.5" />View only
+                </Badge>
+              ) : (
+                <>
+                  {report.status === "done" && (
+                    isEditing ? (
+                      <>
+                        <Button variant="outline" size="sm" className="gap-2" data-testid="button-cancel-edit" onClick={cancelEditing} disabled={saveMutation.isPending}>
+                          <X className="w-4 h-4" />Cancel
+                        </Button>
+                        <Button size="sm" className="gap-2" data-testid="button-save-changes" onClick={() => saveMutation.mutate(sections)} disabled={saveMutation.isPending}>
+                          {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                          Save changes
+                        </Button>
+                      </>
+                    ) : (
+                      <Button variant="outline" size="sm" className="gap-2" data-testid="button-edit" onClick={startEditing}>
+                        <Pencil className="w-4 h-4" />Edit
+                      </Button>
+                    )
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 hover:text-destructive hover:border-destructive/40"
+                    onClick={() => deleteMutation.mutate()}
+                    disabled={deleteMutation.isPending || isEditing}
+                  >
+                    {deleteMutation.isPending
+                      ? <Loader2 className="w-4 h-4 animate-spin" />
+                      : <Trash2 className="w-4 h-4" />}
+                    Delete
                   </Button>
-                )
+                </>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 hover:text-destructive hover:border-destructive/40"
-                onClick={() => deleteMutation.mutate()}
-                disabled={deleteMutation.isPending || isEditing}
-              >
-                {deleteMutation.isPending
-                  ? <Loader2 className="w-4 h-4 animate-spin" />
-                  : <Trash2 className="w-4 h-4" />}
-                Delete
-              </Button>
             </div>
           </div>
         </div>
@@ -267,9 +276,11 @@ export default function ReportDetailPage() {
                 ? "No structured financial data could be extracted from this document."
                 : "This report doesn't have any charts yet."}
             </p>
-            <Button variant="outline" size="sm" className="gap-2 mt-1" onClick={startEditing}>
-              <Pencil className="w-4 h-4" />Add a chart manually
-            </Button>
+            {!isReadOnly && (
+              <Button variant="outline" size="sm" className="gap-2 mt-1" onClick={startEditing}>
+                <Pencil className="w-4 h-4" />Add a chart manually
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
