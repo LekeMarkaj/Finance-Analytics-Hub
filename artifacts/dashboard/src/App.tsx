@@ -197,7 +197,7 @@ function BrandHeader() {
       <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-primary-foreground">
         <BarChart2 className="w-5 h-5" />
       </div>
-      <span>SHSKUK Finance</span>
+      <span>Financial Analytics</span>
     </div>
   );
 }
