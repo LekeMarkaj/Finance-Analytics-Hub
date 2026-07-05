@@ -1,14 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   ResponsiveContainer, Cell,
 } from "recharts";
-import { FileBarChart2, Upload, Loader2, CheckCircle2, AlertCircle, LayoutDashboard, ArrowRight } from "lucide-react";
+import { FileBarChart2, Loader2, CheckCircle2, AlertCircle, LayoutDashboard, ArrowRight } from "lucide-react";
 import { format, startOfMonth, eachMonthOfInterval, subMonths } from "date-fns";
 import { apiFetch, CHART_COLORS, type PdfUpload } from "@/lib/reports";
 
@@ -106,12 +105,6 @@ export default function DashboardPage() {
           </h1>
           <p className="text-muted-foreground mt-1">Summary of your uploaded financial reports.</p>
         </div>
-        <Link href="/pdf-upload">
-          <Button className="gap-2">
-            <Upload className="w-4 h-4" />
-            Upload Report
-          </Button>
-        </Link>
       </div>
 
       {isLoading ? (
@@ -174,11 +167,7 @@ export default function DashboardPage() {
               <div className="flex flex-col items-center justify-center py-8 gap-3 text-center">
                 <FileBarChart2 className="w-8 h-8 text-muted-foreground/30" />
                 <p className="text-sm text-muted-foreground">No reports yet.</p>
-                <Link href="/pdf-upload">
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Upload className="w-3.5 h-3.5" />Upload a report
-                  </Button>
-                </Link>
+                <p className="text-xs text-muted-foreground mt-1">Upload your first report on the Reports page.</p>
               </div>
             ) : (
               <div>
