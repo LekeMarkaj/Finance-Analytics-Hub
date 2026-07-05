@@ -4,8 +4,15 @@ import { StripeSync } from "stripe-replit-sync";
 /**
  * Fetches Stripe credentials from the Replit connection API.
  * Not cached -- tokens can rotate, so fetch fresh each time.
+ *
+ * Note: the Replit-managed Stripe connection only exposes a `secret` (API key)
+ * -- there is no `webhook_secret` field. Webhook signature verification instead
+ * relies on the "managed webhook" flow (see `findOrCreateManagedWebhook` in
+ * index.ts), which stores its own signing secret in `stripe._managed_webhooks`
+ * and is looked up automatically by `StripeSync.processWebhook` when no
+ * `stripeWebhookSecret` is passed in.
  */
-async function getStripeCredentials(): Promise<{ secretKey: string; webhookSecret?: string }> {
+async function getStripeCredentials(): Promise<{ secretKey: string }> {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? "repl " + process.env.REPL_IDENTITY
@@ -32,7 +39,7 @@ async function getStripeCredentials(): Promise<{ secretKey: string; webhookSecre
     throw new Error(`Failed to fetch Stripe credentials: ${resp.status} ${resp.statusText}`);
   }
 
-  const data = await resp.json();
+  const data = (await resp.json()) as { items?: Array<{ settings?: { secret?: string } }> };
   const settings = data.items?.[0]?.settings;
 
   if (!settings?.secret) {
@@ -44,7 +51,6 @@ async function getStripeCredentials(): Promise<{ secretKey: string; webhookSecre
 
   return {
     secretKey: settings.secret,
-    webhookSecret: settings.webhook_secret,
   };
 }
 
@@ -67,10 +73,11 @@ export async function getStripeSync(): Promise<StripeSync> {
     throw new Error("DATABASE_URL environment variable is required");
   }
 
-  const { secretKey, webhookSecret } = await getStripeCredentials();
+  const { secretKey } = await getStripeCredentials();
   return new StripeSync({
     poolConfig: { connectionString: databaseUrl },
     stripeSecretKey: secretKey,
-    stripeWebhookSecret: webhookSecret ?? "",
+    // No stripeWebhookSecret: this app uses managed webhooks exclusively, so
+    // StripeSync looks up the signing secret from stripe._managed_webhooks itself.
   });
 }

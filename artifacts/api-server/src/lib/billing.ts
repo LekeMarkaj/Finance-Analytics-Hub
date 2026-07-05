@@ -137,3 +137,26 @@ export async function checkAndIncrementUsage(
 
   return { allowed: true, tier: plan.tier, used: row[kind], limit };
 }
+
+/**
+ * Reverses a previous `checkAndIncrementUsage` increment. Used when work reserved
+ * against a user's monthly quota fails after the fact (e.g. async PDF processing
+ * errors out), so a failed attempt doesn't permanently consume their allowance.
+ */
+export async function decrementUsage(userId: string, kind: "creates" | "uploads"): Promise<void> {
+  const month = currentMonthKey();
+
+  if (kind === "creates") {
+    await db.execute(sql`
+      UPDATE usage_counters
+      SET creates = GREATEST(creates - 1, 0), updated_at = now()
+      WHERE user_id = ${userId} AND month = ${month}
+    `);
+  } else {
+    await db.execute(sql`
+      UPDATE usage_counters
+      SET uploads = GREATEST(uploads - 1, 0), updated_at = now()
+      WHERE user_id = ${userId} AND month = ${month}
+    `);
+  }
+}

@@ -18,6 +18,9 @@ import { Button } from "@/components/ui/button";
 import PricingCards from "@/components/PricingCards";
 import { Link } from "wouter";
 import { Loader2, BarChart2 } from "lucide-react";
+import { apiFetch } from "@/lib/reports";
+import { takePendingCheckout } from "@/lib/pendingCheckout";
+import { useToast } from "@/hooks/use-toast";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -163,9 +166,38 @@ function isPublicReportPath(location: string): boolean {
   return /^\/reports\/[^/]+$/.test(location);
 }
 
+function usePendingCheckoutResume() {
+  const { isSignedIn } = useAuth();
+  const { toast } = useToast();
+  const startedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isSignedIn || startedRef.current) return;
+    const priceId = takePendingCheckout();
+    if (!priceId) return;
+    startedRef.current = true;
+    apiFetch("/billing/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ priceId }),
+    })
+      .then((res: { url: string }) => {
+        window.location.href = res.url;
+      })
+      .catch((err: Error) => {
+        toast({
+          title: "Could not resume checkout",
+          description: err.message || "Please choose a plan again from your profile.",
+          variant: "destructive",
+        });
+      });
+  }, [isSignedIn, toast]);
+}
+
 function AppShell() {
   const [location] = useLocation();
   const { isLoaded, isSignedIn } = useAuth();
+  usePendingCheckoutResume();
 
   if (!isLoaded) {
     return (

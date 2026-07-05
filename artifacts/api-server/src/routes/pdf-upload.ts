@@ -7,7 +7,7 @@ import { pdfUploadsTable } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
 import type { ExtractedFinancialData } from "@workspace/db";
 import { requireAuth, optionalAuth } from "../middlewares/auth";
-import { checkAndIncrementUsage } from "../lib/billing";
+import { checkAndIncrementUsage, decrementUsage } from "../lib/billing";
 
 const router = Router();
 
@@ -140,6 +140,12 @@ Rules:
           updatedAt: new Date(),
         })
         .where(eq(pdfUploadsTable.id, record.id));
+
+      // The upload failed to process, so it shouldn't count against the user's
+      // monthly quota -- give back the slot reserved by checkAndIncrementUsage above.
+      await decrementUsage(req.userId, "uploads").catch((decErr) => {
+        console.error("Failed to decrement upload usage after processing error", decErr);
+      });
     }
   }
 );

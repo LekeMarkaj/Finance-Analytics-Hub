@@ -11,6 +11,7 @@ import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/reports";
 import { useToast } from "@/hooks/use-toast";
+import { setPendingCheckout } from "@/lib/pendingCheckout";
 
 interface PlanPrice {
   id: string;
@@ -89,6 +90,7 @@ export default function PricingCards({ currentTier, onCheckoutStart }: PricingCa
     const price = plan.prices.find((p) => p.interval === billingInterval);
     if (!price) return;
     if (!isSignedIn) {
+      setPendingCheckout(price.id);
       navigate("/sign-up");
       return;
     }
