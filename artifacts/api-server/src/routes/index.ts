@@ -6,7 +6,6 @@ import yearlyComparisonsRouter from "./yearly-comparisons";
 import ownRevenuesRouter from "./own-revenues";
 import balanceSheetRouter from "./balance-sheet";
 import summaryRouter from "./summary";
-import customDatasetsRouter from "./custom-datasets";
 import adminUsersRouter from "./admin-users";
 import pdfUploadRouter from "./pdf-upload";
 
@@ -19,7 +18,6 @@ router.use(yearlyComparisonsRouter);
 router.use(ownRevenuesRouter);
 router.use(balanceSheetRouter);
 router.use(summaryRouter);
-router.use(customDatasetsRouter);
 router.use(adminUsersRouter);
 router.use(pdfUploadRouter);
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -8,12 +8,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Search, Trash2, Loader2, FileBarChart2, Upload, AlertCircle, BarChart3, MoreVertical, Link2 } from "lucide-react";
+import { FileText, Search, Trash2, Loader2, FileBarChart2, Upload, AlertCircle, BarChart3, MoreVertical, Link2, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { apiFetch, type PdfUpload } from "@/lib/reports";
 
@@ -120,8 +129,70 @@ function ReportCard({ upload, onDelete, deleting }: {
   );
 }
 
+function CreateReportDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const [title, setTitle] = useState("");
+  const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const createMutation = useMutation({
+    mutationFn: () => apiFetch("/pdf-uploads/manual", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: title.trim() }),
+    }),
+    onSuccess: (report: PdfUpload) => {
+      queryClient.invalidateQueries({ queryKey: ["pdfUploads"] });
+      onOpenChange(false);
+      setTitle("");
+      navigate(`/reports/${report.id}`);
+    },
+    onError: (err: Error) => {
+      toast({ title: "Could not create report", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || createMutation.isPending) return;
+    createMutation.mutate();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(next) => { if (!createMutation.isPending) { onOpenChange(next); if (!next) setTitle(""); } }}>
+      <DialogContent>
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle>Create a new report</DialogTitle>
+            <DialogDescription>
+              Start with a blank report and add charts manually — no PDF required.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-2">
+            <Label htmlFor="report-title">Report title</Label>
+            <Input
+              id="report-title"
+              autoFocus
+              placeholder="e.g. Q3 Marketing Budget"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={!title.trim() || createMutation.isPending} className="gap-2">
+              {createMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              Create report
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function ReportsPage() {
   const [search, setSearch] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -161,13 +232,21 @@ export default function ReportsPage() {
           </h1>
           <p className="text-muted-foreground mt-1">All uploaded and analysed financial reports.</p>
         </div>
-        <Link href="/pdf-upload">
-          <Button className="gap-2">
-            <Upload className="w-4 h-4" />
-            Upload Report
+        <div className="flex items-center gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => setCreateOpen(true)}>
+            <Plus className="w-4 h-4" />
+            Create Report
           </Button>
-        </Link>
+          <Link href="/pdf-upload">
+            <Button className="gap-2">
+              <Upload className="w-4 h-4" />
+              Upload Report
+            </Button>
+          </Link>
+        </div>
       </div>
+
+      <CreateReportDialog open={createOpen} onOpenChange={setCreateOpen} />
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

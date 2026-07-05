@@ -10,8 +10,6 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import Reports from "@/pages/Reports";
 import ReportDetail from "@/pages/ReportDetail";
-import CustomDatasets from "@/pages/CustomDatasets";
-import CustomDatasetDetail from "@/pages/CustomDatasetDetail";
 import Profile from "@/pages/Profile";
 import AdminUsers from "@/pages/AdminUsers";
 import PdfUpload from "@/pages/PdfUpload";
@@ -174,8 +172,6 @@ function AppShell() {
   else if (location === "/reports") page = <Reports />;
   else if (location.startsWith("/reports/")) page = <ReportDetail />;
   else if (location === "/pdf-upload") page = <PdfUpload />;
-  else if (location === "/custom") page = <CustomDatasets />;
-  else if (location.startsWith("/custom/")) page = <CustomDatasetDetail />;
   else if (location.startsWith("/profile")) page = <Profile />;
   else if (location === "/admin/users") page = <AdminUsers />;
   else page = <NotFound />;

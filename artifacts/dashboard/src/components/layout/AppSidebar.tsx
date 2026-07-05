@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, LayoutDashboard, FileBarChart2, Database, LogOut, Settings, Users, Sun, Moon, BarChart2 } from "lucide-react";
+import { Home, LayoutDashboard, FileBarChart2, LogOut, Settings, Users, Sun, Moon, BarChart2 } from "lucide-react";
 import { useUser, useClerk } from "@clerk/react";
 import {
   Sidebar,
@@ -18,7 +18,6 @@ import { useTheme } from "@/hooks/use-theme";
 const navItems = [
   { name: "Home", href: "/pdf-upload", icon: Home },
   { name: "Reports", href: "/reports", icon: FileBarChart2 },
-  { name: "Custom Datasets", href: "/custom", icon: Database },
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
 ];
 

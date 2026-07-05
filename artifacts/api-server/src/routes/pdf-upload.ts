@@ -142,6 +142,33 @@ Rules:
   }
 );
 
+router.post("/pdf-uploads/manual", requireAuth, async (req: any, res: any): Promise<void> => {
+  const title = typeof req.body?.title === "string" ? req.body.title.trim() : "";
+  if (!title) {
+    res.status(400).json({ error: "Title is required" });
+    return;
+  }
+
+  const extractedData: ExtractedFinancialData = {
+    title,
+    summary: "",
+    currency: "$",
+    sections: [],
+  };
+
+  const [record] = await db
+    .insert(pdfUploadsTable)
+    .values({
+      userId: req.userId,
+      fileName: title,
+      status: "done",
+      extractedData,
+    })
+    .returning();
+
+  res.status(201).json(uploadToApi(record));
+});
+
 router.get("/pdf-uploads", requireAuth, async (req: any, res: any): Promise<void> => {
   const rows = await db
     .select()

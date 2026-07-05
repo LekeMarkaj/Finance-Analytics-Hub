@@ -263,7 +263,9 @@ export default function ReportDetailPage() {
           <CardContent className="p-8 flex flex-col items-center gap-3 text-center">
             <FileText className="w-10 h-10 text-muted-foreground/30" />
             <p className="text-sm text-muted-foreground">
-              No structured financial data could be extracted from this document.
+              {report.extractedData?.summary
+                ? "No structured financial data could be extracted from this document."
+                : "This report doesn't have any charts yet."}
             </p>
             <Button variant="outline" size="sm" className="gap-2 mt-1" onClick={startEditing}>
               <Pencil className="w-4 h-4" />Add a chart manually
