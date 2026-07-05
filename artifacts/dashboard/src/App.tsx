@@ -52,7 +52,6 @@ const clerkAppearance = {
   options: {
     logoPlacement: "inside" as const,
     logoLinkUrl: basePath || "/",
-    logoImageUrl: `${window.location.origin}${basePath}/logo.svg`,
   },
   variables: {
     colorPrimary: "hsl(213, 94%, 42%)",
@@ -192,9 +191,21 @@ function AppShell() {
   return <AppLayout>{page}</AppLayout>;
 }
 
+function BrandHeader() {
+  return (
+    <div className="flex items-center justify-center gap-2 font-bold text-foreground mb-6">
+      <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-primary-foreground">
+        <BarChart2 className="w-5 h-5" />
+      </div>
+      <span>SHSKUK Finance</span>
+    </div>
+  );
+}
+
 function SignInPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+      <BrandHeader />
       <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
     </div>
   );
@@ -202,7 +213,8 @@ function SignInPage() {
 
 function SignUpPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+      <BrandHeader />
       <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
     </div>
   );
