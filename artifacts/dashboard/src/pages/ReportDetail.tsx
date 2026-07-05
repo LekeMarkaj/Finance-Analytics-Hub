@@ -172,10 +172,15 @@ export default function ReportDetailPage() {
             <div className="min-w-0">
               <h1 className="text-2xl font-bold tracking-tight text-foreground leading-snug">{title}</h1>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
-                <StatusBadge status={report.status} />
                 <span className="text-xs text-muted-foreground">
                   {format(new Date(report.createdAt), "MMMM d, yyyy 'at' HH:mm")}
                 </span>
+                {report.status !== "done" && (
+                  <>
+                    <span className="text-xs text-muted-foreground">·</span>
+                    <StatusBadge status={report.status} />
+                  </>
+                )}
                 <span className="text-xs text-muted-foreground">·</span>
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <FileText className="w-3 h-3" />{report.fileName}
