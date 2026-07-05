@@ -16,7 +16,7 @@ import PdfUpload from "@/pages/PdfUpload";
 import NotFound from "@/pages/not-found";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Loader2 } from "lucide-react";
+import { Loader2, BarChart2 } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -100,9 +100,7 @@ function LandingPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2 font-bold text-foreground">
-          <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold">
-            €
-          </div>
+          <BarChart2 className="w-6 h-6 text-primary" />
           <span>Financial Analytics</span>
         </div>
         <div className="flex items-center gap-3">
@@ -116,8 +114,8 @@ function LandingPage() {
       </header>
       <main className="flex-1 flex items-center justify-center px-6 py-16">
         <div className="max-w-2xl mx-auto text-center space-y-6">
-          <div className="w-16 h-16 rounded-xl bg-primary flex items-center justify-center text-primary-foreground text-3xl font-bold mx-auto">
-            €
+          <div className="w-16 h-16 rounded-xl bg-primary flex items-center justify-center text-primary-foreground mx-auto">
+            <BarChart2 className="w-8 h-8" />
           </div>
           <h1 className="text-4xl font-bold text-foreground">
             Financial Analytics Dashboard
