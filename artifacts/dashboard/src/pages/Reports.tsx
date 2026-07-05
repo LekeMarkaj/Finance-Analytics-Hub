@@ -2,12 +2,18 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Search, Trash2, Loader2, FileBarChart2, Upload, AlertCircle, BarChart3 } from "lucide-react";
+import { FileText, Search, Trash2, Loader2, FileBarChart2, Upload, AlertCircle, BarChart3, MoreVertical, Link2 } from "lucide-react";
 import { format } from "date-fns";
 import { apiFetch, type PdfUpload } from "@/lib/reports";
 
@@ -35,6 +41,22 @@ function ReportCard({ upload, onDelete, deleting }: {
 }) {
   const title = upload.extractedData?.title || upload.fileName.replace(/\.pdf$/i, "");
   const sectionCount = upload.extractedData?.sections?.length ?? 0;
+  const { toast } = useToast();
+
+  const handleCopyLink = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = `${window.location.origin}/reports/${upload.id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      toast({ title: "Link copied" });
+    });
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onDelete();
+  };
 
   return (
     <Link href={`/reports/${upload.id}`}>
@@ -55,20 +77,37 @@ function ReportCard({ upload, onDelete, deleting }: {
               {sectionCount} {sectionCount === 1 ? "chart" : "charts"}
             </div>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 left-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity bg-background/70 hover:bg-destructive/10 hover:text-destructive"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(); }}
-            disabled={deleting}
-          >
-            {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-          </Button>
         </div>
 
         <CardContent className="p-4 space-y-2">
           <div className="flex items-start justify-between gap-2">
             <p className="font-semibold text-sm text-foreground leading-snug line-clamp-2 flex-1">{title}</p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity -mr-1 -mt-0.5"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                >
+                  <MoreVertical className="w-3.5 h-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem onClick={handleCopyLink} className="gap-2 cursor-pointer">
+                  <Link2 className="w-4 h-4" />
+                  Copy link
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="gap-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                >
+                  {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <StatusBadge status={upload.status} />
