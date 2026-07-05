@@ -502,7 +502,7 @@ export default function Profile() {
           </Card>
         </div>
 
-        <div className="w-full max-w-3xl">
+        <div className="w-full max-w-lg">
           <PlanUsageSection />
         </div>
 
