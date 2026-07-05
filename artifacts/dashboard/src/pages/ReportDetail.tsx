@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -5,10 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Trash2, Loader2, AlertCircle, FileText } from "lucide-react";
+import { ArrowLeft, Trash2, Loader2, AlertCircle, FileText, Pencil, Plus, X, Check } from "lucide-react";
 import { format } from "date-fns";
-import { apiFetch, type PdfUpload } from "@/lib/reports";
+import { apiFetch, type PdfUpload, type ExtractedSection } from "@/lib/reports";
 import { SectionChart } from "@/components/SectionChart";
+import { EditChartDialog } from "@/components/EditChartDialog";
 
 function StatusBadge({ status }: { status: PdfUpload["status"] }) {
   if (status === "processing") return (
@@ -26,6 +28,12 @@ export default function ReportDetailPage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [sections, setSections] = useState<ExtractedSection[]>([]);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
   const { data: report, isLoading, error } = useQuery<PdfUpload>({
     queryKey: ["pdfUpload", id],
     queryFn: () => apiFetch(`/pdf-uploads/${id}`),
@@ -36,6 +44,12 @@ export default function ReportDetailPage() {
     enabled: !!id,
   });
 
+  useEffect(() => {
+    if (report?.extractedData?.sections) {
+      setSections(report.extractedData.sections);
+    }
+  }, [report?.extractedData]);
+
   const deleteMutation = useMutation({
     mutationFn: () => apiFetch(`/pdf-uploads/${id}`, { method: "DELETE" }),
     onSuccess: () => {
@@ -45,6 +59,26 @@ export default function ReportDetailPage() {
     },
     onError: (err: Error) => {
       toast({ title: "Delete failed", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: (newSections: ExtractedSection[]) =>
+      apiFetch(`/pdf-uploads/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          extractedData: { ...report!.extractedData, sections: newSections },
+        }),
+      }),
+    onSuccess: (updated: PdfUpload) => {
+      queryClient.setQueryData(["pdfUpload", id], updated);
+      queryClient.invalidateQueries({ queryKey: ["pdfUploads"] });
+      toast({ title: "Changes saved" });
+      setIsEditing(false);
+    },
+    onError: (err: Error) => {
+      toast({ title: "Save failed", description: err.message, variant: "destructive" });
     },
   });
 
@@ -75,7 +109,55 @@ export default function ReportDetailPage() {
   }
 
   const title = report.extractedData?.title || report.fileName.replace(/\.pdf$/i, "");
-  const hasSections = report.extractedData?.sections && report.extractedData.sections.length > 0;
+  const hasSections = sections.length > 0;
+
+  const startEditing = () => {
+    setSections(report.extractedData?.sections ?? []);
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setSections(report.extractedData?.sections ?? []);
+    setIsEditing(false);
+  };
+
+  const handleDrop = (targetIndex: number) => {
+    if (dragIndex === null || dragIndex === targetIndex) return;
+    setSections((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(dragIndex, 1);
+      next.splice(targetIndex, 0, moved);
+      return next;
+    });
+    setDragIndex(null);
+  };
+
+  const toggleWidth = (index: number) => {
+    setSections((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, width: s.width === "full" ? "half" : "full" } : s))
+    );
+  };
+
+  const removeSection = (index: number) => {
+    setSections((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const openEditDialog = (index: number) => {
+    setEditingIndex(index);
+    setDialogOpen(true);
+  };
+
+  const openAddDialog = () => {
+    setEditingIndex(null);
+    setDialogOpen(true);
+  };
+
+  const handleDialogSave = (section: ExtractedSection) => {
+    setSections((prev) => {
+      if (editingIndex === null) return [...prev, section];
+      return prev.map((s, i) => (i === editingIndex ? section : s));
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -99,18 +181,37 @@ export default function ReportDetailPage() {
                 </span>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 hover:text-destructive hover:border-destructive/40 flex-shrink-0"
-              onClick={() => deleteMutation.mutate()}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending
-                ? <Loader2 className="w-4 h-4 animate-spin" />
-                : <Trash2 className="w-4 h-4" />}
-              Delete
-            </Button>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {report.status === "done" && (
+                isEditing ? (
+                  <>
+                    <Button variant="outline" size="sm" className="gap-2" data-testid="button-cancel-edit" onClick={cancelEditing} disabled={saveMutation.isPending}>
+                      <X className="w-4 h-4" />Cancel
+                    </Button>
+                    <Button size="sm" className="gap-2" data-testid="button-save-changes" onClick={() => saveMutation.mutate(sections)} disabled={saveMutation.isPending}>
+                      {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                      Save changes
+                    </Button>
+                  </>
+                ) : (
+                  <Button variant="outline" size="sm" className="gap-2" data-testid="button-edit" onClick={startEditing}>
+                    <Pencil className="w-4 h-4" />Edit
+                  </Button>
+                )
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 hover:text-destructive hover:border-destructive/40"
+                onClick={() => deleteMutation.mutate()}
+                disabled={deleteMutation.isPending || isEditing}
+              >
+                {deleteMutation.isPending
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <Trash2 className="w-4 h-4" />}
+                Delete
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -157,24 +258,62 @@ export default function ReportDetailPage() {
         </Card>
       )}
 
-      {report.status === "done" && !hasSections && (
+      {report.status === "done" && !hasSections && !isEditing && (
         <Card className="border-dashed">
           <CardContent className="p-8 flex flex-col items-center gap-3 text-center">
             <FileText className="w-10 h-10 text-muted-foreground/30" />
             <p className="text-sm text-muted-foreground">
               No structured financial data could be extracted from this document.
             </p>
+            <Button variant="outline" size="sm" className="gap-2 mt-1" onClick={startEditing}>
+              <Pencil className="w-4 h-4" />Add a chart manually
+            </Button>
           </CardContent>
         </Card>
       )}
 
-      {hasSections && (
+      {report.status === "done" && (hasSections || isEditing) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {report.extractedData!.sections.map((section, i) => (
-            <SectionChart key={i} section={section} currency={report.extractedData!.currency} />
+          {sections.map((section, i) => (
+            <div
+              key={i}
+              className={section.width === "full" ? "md:col-span-2" : ""}
+              draggable={isEditing}
+              onDragStart={() => setDragIndex(i)}
+              onDragOver={(e) => isEditing && e.preventDefault()}
+              onDrop={() => handleDrop(i)}
+            >
+              <SectionChart
+                section={section}
+                currency={report.extractedData?.currency ?? ""}
+                isEditing={isEditing}
+                onToggleWidth={() => toggleWidth(i)}
+                onEdit={() => openEditDialog(i)}
+                onDelete={() => removeSection(i)}
+              />
+            </div>
           ))}
+
+          {isEditing && (
+            <button
+              type="button"
+              data-testid="button-add-chart"
+              onClick={openAddDialog}
+              className="flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-lg min-h-[280px] text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors"
+            >
+              <Plus className="w-8 h-8" />
+              <span className="text-sm font-medium">Add chart</span>
+            </button>
+          )}
         </div>
       )}
+
+      <EditChartDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        section={editingIndex !== null ? sections[editingIndex] : undefined}
+        onSave={handleDialogSave}
+      />
     </div>
   );
 }

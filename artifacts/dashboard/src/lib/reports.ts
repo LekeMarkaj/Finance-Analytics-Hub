@@ -4,7 +4,7 @@ export const CHART_COLORS = [
 ];
 
 export interface ExtractedItem { label: string; value: number; color?: string; }
-export interface ExtractedSection { name: string; chartType: "bar" | "line" | "pie" | "area"; items: ExtractedItem[]; }
+export interface ExtractedSection { name: string; chartType: "bar" | "line" | "pie" | "area"; items: ExtractedItem[]; width?: "half" | "full"; }
 export interface ExtractedData { title: string; summary: string; currency: string; sections: ExtractedSection[]; }
 export interface PdfUpload {
   id: number;

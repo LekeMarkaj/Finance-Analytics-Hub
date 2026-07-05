@@ -33,6 +33,7 @@ export interface ExtractedSection {
   name: string;
   chartType: "bar" | "line" | "pie" | "area";
   items: ExtractedItem[];
+  width?: "half" | "full";
 }
 
 export interface ExtractedItem {

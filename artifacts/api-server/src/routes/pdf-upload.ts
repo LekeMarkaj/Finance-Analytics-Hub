@@ -164,6 +164,42 @@ router.get("/pdf-uploads/:id", requireAuth, async (req: any, res: any): Promise<
   res.json(uploadToApi(row));
 });
 
+router.patch("/pdf-uploads/:id", requireAuth, async (req: any, res: any): Promise<void> => {
+  const id = Number(req.params.id);
+  const extractedData = req.body?.extractedData;
+
+  if (!extractedData || typeof extractedData !== "object" || !Array.isArray(extractedData.sections)) {
+    res.status(400).json({ error: "Invalid extractedData payload" });
+    return;
+  }
+
+  for (const section of extractedData.sections) {
+    if (
+      typeof section.name !== "string" ||
+      !["bar", "line", "pie", "area"].includes(section.chartType) ||
+      !Array.isArray(section.items) ||
+      section.items.some(
+        (item: any) => typeof item.label !== "string" || typeof item.value !== "number" || Number.isNaN(item.value)
+      )
+    ) {
+      res.status(400).json({ error: "Invalid section data" });
+      return;
+    }
+  }
+
+  const [row] = await db
+    .update(pdfUploadsTable)
+    .set({ extractedData, updatedAt: new Date() })
+    .where(and(eq(pdfUploadsTable.id, id), eq(pdfUploadsTable.userId, req.userId)))
+    .returning();
+
+  if (!row) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
+  res.json(uploadToApi(row));
+});
+
 router.delete("/pdf-uploads/:id", requireAuth, async (req: any, res: any): Promise<void> => {
   const id = Number(req.params.id);
   const [row] = await db

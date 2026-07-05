@@ -1,1 +1,3 @@
 - [PDF extraction library](pdf-extraction.md) — pdf-parse v2 crashes Node.js on startup (DOMMatrix); use unpdf instead
+- [Clerk test user id for DB-seeded e2e tests](clerk-test-userid.md) — no `/api/me`; drive tests through the real create flow instead of guessing userId to pre-seed rows.
+- [lib/db composite project rebuild](lib-db-composite-build.md) — after editing `lib/db` schema files, run `tsc -b --force` there or dependents see stale dist/types.
