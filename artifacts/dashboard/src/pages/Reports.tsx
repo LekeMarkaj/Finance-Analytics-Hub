@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
-import PdfUploadDropzone from "@/components/PdfUploadDropzone";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -259,7 +258,6 @@ function CreateReportDialog({ open, onOpenChange }: { open: boolean; onOpenChang
 export default function ReportsPage() {
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
-  const [showUpload, setShowUpload] = useState(false);
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -305,7 +303,7 @@ export default function ReportsPage() {
             <Plus className="w-4 h-4" />
             Create Report
           </Button>
-          <Button className="gap-2" onClick={() => setShowUpload(true)}>
+          <Button className="gap-2" onClick={() => navigate("/pdf-upload")}>
             <Upload className="w-4 h-4" />
             Upload Report
           </Button>
@@ -313,19 +311,6 @@ export default function ReportsPage() {
       </div>
 
       <CreateReportDialog open={createOpen} onOpenChange={setCreateOpen} />
-
-      {showUpload && (
-        <div className="relative">
-          <PdfUploadDropzone onSuccess={(data) => navigate(`/reports/${data.id}`)} />
-          <button
-            className="absolute top-3 right-3 text-muted-foreground hover:text-foreground rounded-full p-1"
-            onClick={() => setShowUpload(false)}
-            aria-label="Close upload"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -365,9 +350,11 @@ export default function ReportsPage() {
             </p>
           </div>
           {!search && (
-            <div className="w-full max-w-md">
-              <PdfUploadDropzone onSuccess={(data) => navigate(`/reports/${data.id}`)} />
-            </div>
+            <Link href="/pdf-upload">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Upload className="w-4 h-4" />Upload a report
+              </Button>
+            </Link>
           )}
         </div>
       ) : (

@@ -121,6 +121,14 @@ export default function DashboardPage() {
         </div>
       )}
 
+      <div className="space-y-2">
+        <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+          <Upload className="w-4 h-4 text-primary" />
+          Upload PDF Report
+        </h2>
+        <PdfUploadDropzone onSuccess={(data) => { window.location.href = `/reports/${data.id}`; }} />
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <Card className="lg:col-span-3">
           <CardHeader className="pb-2">
@@ -179,38 +187,26 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-2">
-          <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-            <Upload className="w-4 h-4 text-primary" />
-            Upload PDF Report
-          </h2>
-          <PdfUploadDropzone onSuccess={(data) => { window.location.href = `/reports/${data.id}`; }} />
-        </div>
-
-        <div className="lg:col-span-1">
-          {!isLoading && done > 0 && (
-            <Card>
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-cyan-500" />
-                  <p className="text-sm font-medium text-foreground">
-                    {done} report{done !== 1 ? "s" : ""} analysed
-                  </p>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {totalSections} chart{totalSections !== 1 ? "s" : ""} extracted. View individual reports for detailed charts.
+      {!isLoading && done > 0 && (
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="w-5 h-5 text-cyan-500" />
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {done} report{done !== 1 ? "s" : ""} analysed, {totalSections} chart{totalSections !== 1 ? "s" : ""} extracted
                 </p>
-                <Link href="/reports">
-                  <Button variant="outline" size="sm" className="w-full gap-2">
-                    <FileBarChart2 className="w-4 h-4" />Browse Reports
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
+                <p className="text-xs text-muted-foreground">View individual reports for detailed charts and data tables.</p>
+              </div>
+            </div>
+            <Link href="/reports">
+              <Button variant="outline" size="sm" className="gap-2">
+                <FileBarChart2 className="w-4 h-4" />Browse Reports
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
