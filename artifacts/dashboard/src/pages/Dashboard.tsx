@@ -7,8 +7,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   ResponsiveContainer, Cell,
 } from "recharts";
-import { FileBarChart2, Loader2, CheckCircle2, AlertCircle, LayoutDashboard, ArrowRight, Upload } from "lucide-react";
-import PdfUploadDropzone from "@/components/PdfUploadDropzone";
+import { FileBarChart2, Loader2, CheckCircle2, AlertCircle, LayoutDashboard, ArrowRight } from "lucide-react";
 import { format, startOfMonth, eachMonthOfInterval, subMonths } from "date-fns";
 import { apiFetch, CHART_COLORS, type PdfUpload } from "@/lib/reports";
 
@@ -120,14 +119,6 @@ export default function DashboardPage() {
           <StatCard label="Charts Extracted" value={totalSections} icon={LayoutDashboard} color="#0ea5e9" />
         </div>
       )}
-
-      <div className="space-y-2">
-        <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-          <Upload className="w-4 h-4 text-primary" />
-          Upload PDF Report
-        </h2>
-        <PdfUploadDropzone onSuccess={(data) => { window.location.href = `/reports/${data.id}`; }} />
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <Card className="lg:col-span-3">
