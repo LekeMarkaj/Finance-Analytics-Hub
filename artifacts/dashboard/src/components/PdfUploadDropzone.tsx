@@ -1,10 +1,9 @@
 import { useRef, useCallback, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/hooks/use-toast";
-import { FileUp, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { API } from "@/lib/reports";
 import type { ApiError } from "@/lib/reports";
@@ -93,31 +92,6 @@ export default function PdfUploadDropzone({ onSuccess, className }: PdfUploadDro
         onDragLeave={() => setDragging(false)}
         onClick={() => !uploadMutation.isPending && fileInputRef.current?.click()}
       >
-        <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
-          {uploadMutation.isPending ? (
-            <>
-              <Loader2 className="w-12 h-12 text-primary animate-spin" />
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-foreground">Uploading and processing…</p>
-                <p className="text-xs text-muted-foreground">AI is reading your document</p>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <FileUp className="w-8 h-8 text-primary" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-foreground">
-                  Drop a PDF here, or <span className="text-primary underline underline-offset-2">click to browse</span>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Bank statements, budget exports, annual reports — up to 20 MB
-                </p>
-              </div>
-            </>
-          )}
-        </CardContent>
       </Card>
       <input
         ref={fileInputRef}
