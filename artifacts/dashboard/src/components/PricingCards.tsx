@@ -134,34 +134,34 @@ export default function PricingCards({ currentTier, onCheckoutStart }: PricingCa
               {isPopular && (
                 <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">Most popular</Badge>
               )}
-              <CardHeader>
-                <CardTitle className="text-lg">{plan.name}</CardTitle>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">{plan.name}</CardTitle>
                 <CardDescription>
                   {isFree ? (
-                    <span className="text-3xl font-bold text-foreground">Free</span>
+                    <span className="text-2xl font-bold text-foreground">Free</span>
                   ) : (
                     <span>
-                      <span className="text-3xl font-bold text-foreground">
+                      <span className="text-2xl font-bold text-foreground">
                         {price ? formatPrice(price.unitAmount, price.currency) : "—"}
                       </span>
-                      <span className="text-muted-foreground">/{billingInterval === "month" ? "mo" : "yr"}</span>
+                      <span className="text-muted-foreground text-xs">/{billingInterval === "month" ? "mo" : "yr"}</span>
                     </span>
                   )}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col gap-4">
-                <ul className="space-y-2 text-sm flex-1">
+              <CardContent className="flex-1 flex flex-col gap-3">
+                <ul className="space-y-1.5 text-xs flex-1">
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                    <Check className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
                     <span>{plan.createLimit} report {plan.createLimit === 1 ? "creation" : "creations"}/mo</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                    <Check className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
                     <span>{plan.uploadLimit} PDF {plan.uploadLimit === 1 ? "upload" : "uploads"}/mo</span>
                   </li>
                 </ul>
                 <Button
-                  className="w-full gap-2"
+                  className="w-full gap-2 text-sm h-9"
                   variant={isCurrent ? "outline" : isPopular ? "default" : "outline"}
                   disabled={isCurrent || pending || (!isFree && !price)}
                   onClick={() => handleSelect(plan)}
