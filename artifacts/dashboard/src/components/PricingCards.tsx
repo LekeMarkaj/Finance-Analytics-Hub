@@ -136,18 +136,16 @@ export default function PricingCards({ currentTier, onCheckoutStart }: PricingCa
               )}
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">{plan.name}</CardTitle>
-                <CardDescription>
-                  {isFree ? (
-                    <span className="text-2xl font-bold text-foreground">Free</span>
-                  ) : (
+                {!isFree && (
+                  <CardDescription>
                     <span>
                       <span className="text-2xl font-bold text-foreground">
                         {price ? formatPrice(price.unitAmount, price.currency) : "—"}
                       </span>
                       <span className="text-muted-foreground text-xs">/{billingInterval === "month" ? "mo" : "yr"}</span>
                     </span>
-                  )}
-                </CardDescription>
+                  </CardDescription>
+                )}
               </CardHeader>
               <CardContent className="flex-1 flex flex-col gap-3">
                 <ul className="space-y-1.5 text-xs flex-1">
