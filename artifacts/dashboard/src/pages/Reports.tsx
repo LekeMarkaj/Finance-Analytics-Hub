@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,7 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Search, Trash2, Loader2, FileBarChart2, Upload, AlertCircle, BarChart3, MoreVertical, Link2, Plus, X, Globe, Lock } from "lucide-react";
 import { format } from "date-fns";
-import { apiFetch, type PdfUpload, type ApiError } from "@/lib/reports";
+import { apiFetch, API, type PdfUpload, type ApiError } from "@/lib/reports";
 import { ToastAction } from "@/components/ui/toast";
 
 const STATUS_COLORS = ["#0079F2", "#00c2d4", "#6366f1", "#0ea5e9", "#38bdf8", "#818cf8"];
@@ -261,6 +261,7 @@ export default function ReportsPage() {
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: uploads, isLoading } = useQuery<PdfUpload[]>({
     queryKey: ["pdfUploads"],
@@ -283,6 +284,59 @@ export default function ReportsPage() {
     },
   });
 
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch(`${API}/pdf-upload`, {
+        method: "POST",
+        credentials: "include",
+        body: fd,
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        const err: ApiError = new Error(body.error ?? `HTTP ${res.status}`);
+        if (body.code) err.code = body.code;
+        throw err;
+      }
+      return res.json() as Promise<{ id: number }>;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["pdfUploads"] });
+      toast({ title: "PDF uploaded", description: "AI is extracting financial data \u2014 taking you to your report." });
+      navigate(`/reports/${data.id}`);
+    },
+    onError: (err: ApiError) => {
+      if (err.code === "QUOTA_EXCEEDED") {
+        toast({
+          title: "Upload limit reached",
+          description: err.message,
+          variant: "destructive",
+          action: (
+            <ToastAction altText="Upgrade" onClick={() => navigate("/profile")}>
+              Upgrade
+            </ToastAction>
+          ),
+        });
+        return;
+      }
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const handleFile = useCallback((file: File | null | undefined) => {
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      toast({ title: "Invalid file type", description: "Please upload a PDF file.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Maximum file size is 20 MB.", variant: "destructive" });
+      return;
+    }
+    uploadMutation.mutate(file);
+  }, [uploadMutation, toast]);
+
   const filtered = (uploads ?? []).filter((u) => {
     const title = u.extractedData?.title || u.fileName;
     return title.toLowerCase().includes(search.toLowerCase());
@@ -303,7 +357,7 @@ export default function ReportsPage() {
             <Plus className="w-4 h-4" />
             Create Report
           </Button>
-          <Button className="gap-2" onClick={() => navigate("/pdf-upload")}>
+          <Button className="gap-2" onClick={() => fileInputRef.current?.click()}>
             <Upload className="w-4 h-4" />
             Upload Report
           </Button>
@@ -311,6 +365,15 @@ export default function ReportsPage() {
       </div>
 
       <CreateReportDialog open={createOpen} onOpenChange={setCreateOpen} />
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/pdf"
+        className="hidden"
+        onChange={(e) => handleFile(e.target.files?.[0])}
+        onClick={(e) => { (e.target as HTMLInputElement).value = ""; }}
+      />
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -350,11 +413,9 @@ export default function ReportsPage() {
             </p>
           </div>
           {!search && (
-            <Link href="/pdf-upload">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Upload className="w-4 h-4" />Upload a report
-              </Button>
-            </Link>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => fileInputRef.current?.click()}>
+              <Upload className="w-4 h-4" />Upload a report
+            </Button>
           )}
         </div>
       ) : (
