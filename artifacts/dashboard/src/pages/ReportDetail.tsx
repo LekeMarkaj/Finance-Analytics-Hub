@@ -163,9 +163,11 @@ export default function ReportDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/reports")} className="gap-2 self-start -ml-2">
-          <ArrowLeft className="w-4 h-4" />Reports
-        </Button>
+        {!isReadOnly && (
+          <Button variant="ghost" size="sm" onClick={() => navigate("/reports")} className="gap-2 self-start -ml-2">
+            <ArrowLeft className="w-4 h-4" />Reports
+          </Button>
+        )}
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-4 flex-wrap">

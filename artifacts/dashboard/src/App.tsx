@@ -3,7 +3,7 @@ import { ClerkProvider, SignIn, SignUp, Show, useClerk, useAuth } from "@clerk/r
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { shadcn } from "@clerk/themes";
 import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from "wouter";
-import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import PricingCards from "@/components/PricingCards";
 import { Link } from "wouter";
 import { Loader2, BarChart2 } from "lucide-react";
-import { apiFetch } from "@/lib/reports";
+import { apiFetch, type PdfUpload as PdfUploadRecord } from "@/lib/reports";
 import { takePendingCheckout } from "@/lib/pendingCheckout";
 import { useToast } from "@/hooks/use-toast";
 
@@ -194,6 +194,43 @@ function usePendingCheckoutResume() {
   }, [isSignedIn, toast]);
 }
 
+function BareReportView() {
+  return (
+    <div className="min-h-screen bg-background font-sans">
+      <div className="p-4 md:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto w-full">
+          <ReportDetail />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Reports viewed via a shared public link must never expose the dashboard
+// sidebar/navigation — only the report's charts, in read-only mode. We only
+// know ownership once the report has loaded, so default to the bare (no
+// layout) view until we can positively confirm the viewer is the owner.
+function ReportDetailRoute() {
+  const [location] = useLocation();
+  const id = location.split("/")[2];
+
+  const { data: report, isLoading } = useQuery<PdfUploadRecord>({
+    queryKey: ["pdfUpload", id],
+    queryFn: () => apiFetch(`/pdf-uploads/${id}`),
+    enabled: !!id,
+  });
+
+  if (isLoading || !report || report.isOwner === false) {
+    return <BareReportView />;
+  }
+
+  return (
+    <AppLayout>
+      <ReportDetail />
+    </AppLayout>
+  );
+}
+
 function AppShell() {
   const [location] = useLocation();
   const { isLoaded, isSignedIn } = useAuth();
@@ -208,23 +245,18 @@ function AppShell() {
   }
   if (!isSignedIn) {
     if (isPublicReportPath(location)) {
-      return (
-        <div className="min-h-screen bg-background font-sans">
-          <div className="p-4 md:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto w-full">
-              <ReportDetail />
-            </div>
-          </div>
-        </div>
-      );
+      return <BareReportView />;
     }
     return <Redirect to="/sign-in" />;
+  }
+
+  if (location.startsWith("/reports/")) {
+    return <ReportDetailRoute />;
   }
 
   let page: React.ReactNode;
   if (location === "/dashboard") page = <Dashboard />;
   else if (location === "/reports") page = <Reports />;
-  else if (location.startsWith("/reports/")) page = <ReportDetail />;
   else if (location === "/pdf-upload") page = <PdfUpload />;
   else if (location.startsWith("/profile")) page = <Profile />;
   else if (location === "/admin/users") page = <AdminUsers />;
