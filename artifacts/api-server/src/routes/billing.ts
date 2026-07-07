@@ -94,12 +94,10 @@ router.post("/billing/checkout", requireAuth, async (req: any, res) => {
   const customerId = await getOrCreatePaddleCustomer(req.userId, email);
 
   const paddle = getPaddleClient();
-  const origin = `${req.protocol}://${req.get("host")}`;
 
   const transaction = await paddle.transactions.create({
     items: [{ priceId, quantity: 1 }],
     customerId,
-    checkout: { url: `${origin}/profile?checkout=success` },
   });
 
   const checkoutUrl = transaction.checkout?.url;
