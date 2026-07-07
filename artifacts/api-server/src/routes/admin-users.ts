@@ -15,7 +15,7 @@ async function requireAdmin(req: any, res: any, next: any): Promise<void> {
     return;
   }
   const clerk = getClerkClient();
-  const user = await clerk.users.getUser(userId);
+  const user = await clerk.users.getUser(userId as string);
   if (user.publicMetadata?.role !== "admin") {
     res.status(403).json({ error: "Forbidden: admin access required" });
     return;

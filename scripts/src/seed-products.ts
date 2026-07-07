@@ -1,4 +1,4 @@
-import { getUncachableStripeClient } from "./stripeClient";
+import { Paddle, Environment } from "@paddle/paddle-node-sdk";
 
 interface TierConfig {
   tier: "basic" | "pro";
@@ -15,8 +15,8 @@ const TIERS: TierConfig[] = [
     tier: "basic",
     name: "Basic",
     description: "For growing teams that need more reports each month",
-    monthlyAmount: 1500,
-    yearlyAmount: 15000,
+    monthlyAmount: 999,
+    yearlyAmount: 9999,
     createLimit: 15,
     uploadLimit: 15,
   },
@@ -24,85 +24,98 @@ const TIERS: TierConfig[] = [
     tier: "pro",
     name: "Pro",
     description: "For power users who need the highest monthly limits",
-    monthlyAmount: 5000,
-    yearlyAmount: 50000,
+    monthlyAmount: 1999,
+    yearlyAmount: 19999,
     createLimit: 50,
     uploadLimit: 50,
   },
 ];
 
-async function ensureProduct(stripe: Awaited<ReturnType<typeof getUncachableStripeClient>>, config: TierConfig) {
-  const existing = await stripe.products.search({
-    query: `name:'${config.name} Plan' AND active:'true'`,
-  });
+async function seedProducts() {
+  const apiKey = process.env.PADDLE_API_KEY;
+  if (!apiKey) throw new Error("PADDLE_API_KEY is not set");
 
-  let product = existing.data[0];
-  if (product) {
-    console.log(`${config.name} Plan product already exists (${product.id}). Reusing it.`);
-  } else {
-    product = await stripe.products.create({
-      name: `${config.name} Plan`,
-      description: config.description,
-      metadata: {
-        tier: config.tier,
-        createLimit: String(config.createLimit),
-        uploadLimit: String(config.uploadLimit),
-      },
-    });
-    console.log(`Created product: ${product.name} (${product.id})`);
-  }
+  const env =
+    process.env.PADDLE_ENVIRONMENT === "production"
+      ? Environment.production
+      : Environment.sandbox;
+  const paddle = new Paddle(apiKey, { environment: env });
 
-  const existingPrices = await stripe.prices.list({ product: product.id, active: true, limit: 100 });
+  for (const config of TIERS) {
+    const existingProducts: any[] = [];
+    for await (const p of paddle.products.list({ status: ["active"] })) {
+      existingProducts.push(p);
+    }
+    const existing = existingProducts.find(
+      (p: any) => p.customData?.tier === config.tier,
+    );
 
-  const hasMonthly = existingPrices.data.some(
-    (p) => p.recurring?.interval === "month" && p.unit_amount === config.monthlyAmount,
-  );
-  const hasYearly = existingPrices.data.some(
-    (p) => p.recurring?.interval === "year" && p.unit_amount === config.yearlyAmount,
-  );
-
-  if (!hasMonthly) {
-    const monthly = await stripe.prices.create({
-      product: product.id,
-      unit_amount: config.monthlyAmount,
-      currency: "eur",
-      recurring: { interval: "month" },
-      metadata: { tier: config.tier },
-    });
-    console.log(`Created monthly price: €${config.monthlyAmount / 100}/month (${monthly.id})`);
-  } else {
-    console.log(`Monthly price for ${config.name} already exists. Skipping.`);
-  }
-
-  if (!hasYearly) {
-    const yearly = await stripe.prices.create({
-      product: product.id,
-      unit_amount: config.yearlyAmount,
-      currency: "eur",
-      recurring: { interval: "year" },
-      metadata: { tier: config.tier },
-    });
-    console.log(`Created yearly price: €${config.yearlyAmount / 100}/year (${yearly.id})`);
-  } else {
-    console.log(`Yearly price for ${config.name} already exists. Skipping.`);
-  }
-}
-
-async function createProducts() {
-  try {
-    const stripe = await getUncachableStripeClient();
-    console.log("Creating products and prices in Stripe...");
-
-    for (const config of TIERS) {
-      await ensureProduct(stripe, config);
+    let productId: string;
+    if (existing) {
+      productId = existing.id;
+      console.log(`${config.name} product already exists (${productId}). Reusing.`);
+    } else {
+      const product = await paddle.products.create({
+        name: `${config.name} Plan`,
+        description: config.description,
+        taxCategory: "saas",
+        customData: {
+          tier: config.tier,
+          createLimit: String(config.createLimit),
+          uploadLimit: String(config.uploadLimit),
+        },
+      });
+      productId = product.id;
+      console.log(`Created product: ${product.name} (${productId})`);
     }
 
-    console.log("✓ Products and prices ready!");
-    console.log("Webhooks will sync this data to your database automatically.");
-  } catch (error: any) {
-    console.error("Error creating products:", error.message);
-    process.exit(1);
+    const existingPrices: any[] = [];
+    for await (const p of paddle.prices.list({ productId: [productId], status: ["active"] })) {
+      existingPrices.push(p);
+    }
+
+    const hasMonthly = existingPrices.some(
+      (p: any) => p.billingCycle?.interval === "month",
+    );
+    const hasYearly = existingPrices.some(
+      (p: any) => p.billingCycle?.interval === "year",
+    );
+
+    if (!hasMonthly) {
+      const price = await paddle.prices.create({
+        productId,
+        description: `${config.name} Monthly`,
+        unitPrice: { amount: String(config.monthlyAmount), currencyCode: "USD" },
+        billingCycle: { interval: "month", frequency: 1 },
+        trialPeriod: null,
+        taxMode: "account_setting",
+        customData: { tier: config.tier },
+      });
+      console.log(`Created monthly price: $${config.monthlyAmount / 100}/mo (${price.id})`);
+    } else {
+      console.log(`Monthly price for ${config.name} already exists. Skipping.`);
+    }
+
+    if (!hasYearly) {
+      const price = await paddle.prices.create({
+        productId,
+        description: `${config.name} Yearly`,
+        unitPrice: { amount: String(config.yearlyAmount), currencyCode: "USD" },
+        billingCycle: { interval: "year", frequency: 1 },
+        trialPeriod: null,
+        taxMode: "account_setting",
+        customData: { tier: config.tier },
+      });
+      console.log(`Created yearly price: $${config.yearlyAmount / 100}/yr (${price.id})`);
+    } else {
+      console.log(`Yearly price for ${config.name} already exists. Skipping.`);
+    }
   }
+
+  console.log("✓ Paddle products and prices ready!");
 }
 
-createProducts();
+seedProducts().catch((err) => {
+  console.error("Error seeding products:", err.message);
+  process.exit(1);
+});

@@ -37,9 +37,8 @@ export async function getOrCreatePaddleCustomer(
   if (existing) return existing;
 
   const paddle = getPaddleClient();
-  const customer = await paddle.customers.create({
-    email: email ?? undefined,
-  });
+  if (!email) throw new Error("Email is required to create a Paddle customer");
+  const customer = await paddle.customers.create({ email });
 
   await db
     .insert(billingCustomersTable)

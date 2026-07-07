@@ -12,5 +12,7 @@
     "@types/node": "catalog:",
     "tsx": "catalog:"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@paddle/paddle-node-sdk": "^1.10.0"
+  }
 }

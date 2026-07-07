@@ -40,3 +40,4 @@ channel = "stable-25_05"
 [userenv.shared]
 VITE_PADDLE_CLIENT_TOKEN = "live_bf7c4f97f60213986003dba6978"
 PADDLE_ENVIRONMENT = "production"
+VITE_PADDLE_ENVIRONMENT = "production"

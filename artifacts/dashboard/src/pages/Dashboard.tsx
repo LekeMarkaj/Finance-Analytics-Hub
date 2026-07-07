@@ -22,7 +22,7 @@ function StatCard({ label, value, icon: Icon, color }: {
       <CardContent className="p-5 flex items-center gap-4">
         <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
           style={{ background: `${color}20` }}>
-          <Icon className="w-5 h-5" style={{ color }} />
+          <span style={{ color }}><Icon className="w-5 h-5" /></span>
         </div>
         <div>
           <p className="text-2xl font-bold text-foreground">{value}</p>
