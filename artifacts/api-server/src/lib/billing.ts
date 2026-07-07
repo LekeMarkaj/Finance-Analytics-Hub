@@ -1,7 +1,12 @@
-import { sql } from "drizzle-orm";
-import { db, billingCustomersTable, PLAN_LIMITS, type PlanTier } from "@workspace/db";
-import { eq } from "drizzle-orm";
-import { getUncachableStripeClient } from "../stripeClient";
+import { sql, eq } from "drizzle-orm";
+import {
+  db,
+  billingCustomersTable,
+  paddleSubscriptionsTable,
+  PLAN_LIMITS,
+  type PlanTier,
+} from "@workspace/db";
+import { getPaddleClient } from "../paddleClient";
 
 export interface UserPlan {
   tier: PlanTier;
@@ -16,77 +21,71 @@ function currentMonthKey(): string {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
-export async function getStripeCustomerId(userId: string): Promise<string | null> {
+export async function getPaddleCustomerId(userId: string): Promise<string | null> {
   const [row] = await db
     .select()
     .from(billingCustomersTable)
     .where(eq(billingCustomersTable.userId, userId));
-  return row?.stripeCustomerId ?? null;
+  return row?.paddleCustomerId ?? null;
 }
 
-export async function getOrCreateStripeCustomer(userId: string, email: string | null): Promise<string> {
-  const existing = await getStripeCustomerId(userId);
+export async function getOrCreatePaddleCustomer(
+  userId: string,
+  email: string | null,
+): Promise<string> {
+  const existing = await getPaddleCustomerId(userId);
   if (existing) return existing;
 
-  const stripe = await getUncachableStripeClient();
-  const customer = await stripe.customers.create({
+  const paddle = getPaddleClient();
+  const customer = await paddle.customers.create({
     email: email ?? undefined,
-    metadata: { userId },
   });
 
   await db
     .insert(billingCustomersTable)
-    .values({ userId, stripeCustomerId: customer.id })
+    .values({ userId, paddleCustomerId: customer.id })
     .onConflictDoNothing();
 
-  return (await getStripeCustomerId(userId)) ?? customer.id;
+  return (await getPaddleCustomerId(userId)) ?? customer.id;
 }
 
 export async function getUserPlan(userId: string): Promise<UserPlan> {
-  const stripeCustomerId = await getStripeCustomerId(userId);
+  const [sub] = await db
+    .select()
+    .from(paddleSubscriptionsTable)
+    .where(eq(paddleSubscriptionsTable.userId, userId));
 
-  if (!stripeCustomerId) {
-    return { tier: "free", interval: null, limits: PLAN_LIMITS.free, subscriptionId: null, currentPeriodEnd: null };
+  if (!sub || !["active", "trialing"].includes(sub.status)) {
+    return {
+      tier: "free",
+      interval: null,
+      limits: PLAN_LIMITS.free,
+      subscriptionId: null,
+      currentPeriodEnd: null,
+    };
   }
 
-  const result = await db.execute(sql`
-    SELECT
-      s.id as subscription_id,
-      s.current_period_end,
-      pr.recurring,
-      p.metadata as product_metadata
-    FROM stripe.subscriptions s
-    JOIN stripe.subscription_items si ON si.subscription = s.id
-    JOIN stripe.prices pr ON pr.id = si.price
-    JOIN stripe.products p ON p.id = pr.product
-    WHERE s.customer = ${stripeCustomerId} AND s.status IN ('active', 'trialing')
-    ORDER BY s.created DESC
-    LIMIT 1
-  `);
+  return buildPlan(sub);
+}
 
-  const row = result.rows[0] as any;
-  if (!row) {
-    return { tier: "free", interval: null, limits: PLAN_LIMITS.free, subscriptionId: null, currentPeriodEnd: null };
-  }
-
-  const metadata = row.product_metadata ?? {};
-  const tier: PlanTier = metadata.tier === "basic" || metadata.tier === "pro" ? metadata.tier : "free";
-  const limits = {
-    creates: Number(metadata.createLimit) || PLAN_LIMITS[tier].creates,
-    uploads: Number(metadata.uploadLimit) || PLAN_LIMITS[tier].uploads,
-  };
-  const interval = row.recurring?.interval === "year" ? "year" : "month";
-
+function buildPlan(sub: typeof paddleSubscriptionsTable.$inferSelect): UserPlan {
+  const tier = sub.tier as PlanTier;
+  const limits = PLAN_LIMITS[tier] ?? PLAN_LIMITS.free;
+  const currentPeriodEnd = sub.nextBilledAt
+    ? Math.floor(sub.nextBilledAt.getTime() / 1000)
+    : null;
   return {
     tier,
-    interval,
+    interval: sub.interval as "month" | "year",
     limits,
-    subscriptionId: row.subscription_id,
-    currentPeriodEnd: row.current_period_end,
+    subscriptionId: sub.paddleSubscriptionId,
+    currentPeriodEnd,
   };
 }
 
-export async function getMonthlyUsage(userId: string): Promise<{ creates: number; uploads: number }> {
+export async function getMonthlyUsage(
+  userId: string,
+): Promise<{ creates: number; uploads: number }> {
   const month = currentMonthKey();
   const result = await db.execute(sql`
     SELECT creates, uploads FROM usage_counters WHERE user_id = ${userId} AND month = ${month}
@@ -138,12 +137,10 @@ export async function checkAndIncrementUsage(
   return { allowed: true, tier: plan.tier, used: row[kind], limit };
 }
 
-/**
- * Reverses a previous `checkAndIncrementUsage` increment. Used when work reserved
- * against a user's monthly quota fails after the fact (e.g. async PDF processing
- * errors out), so a failed attempt doesn't permanently consume their allowance.
- */
-export async function decrementUsage(userId: string, kind: "creates" | "uploads"): Promise<void> {
+export async function decrementUsage(
+  userId: string,
+  kind: "creates" | "uploads",
+): Promise<void> {
   const month = currentMonthKey();
 
   if (kind === "creates") {

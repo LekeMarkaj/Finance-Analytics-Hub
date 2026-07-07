@@ -1,52 +1,56 @@
 import { Router, type IRouter } from "express";
-import { sql } from "drizzle-orm";
 import { getAuth } from "@clerk/express";
-import { db } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { db, billingCustomersTable, paddleSubscriptionsTable } from "@workspace/db";
 import { requireAuth } from "../middlewares/auth";
 import {
-  getOrCreateStripeCustomer,
-  getStripeCustomerId,
+  getOrCreatePaddleCustomer,
+  getPaddleCustomerId,
   getUserPlan,
   getMonthlyUsage,
 } from "../lib/billing";
-import { getUncachableStripeClient } from "../stripeClient";
+import { getPaddleClient } from "../paddleClient";
 
 const router: IRouter = Router();
 
 router.get("/billing/plans", async (_req, res) => {
-  const result = await db.execute(sql`
-    SELECT
-      p.id as product_id,
-      p.name as product_name,
-      p.metadata as product_metadata,
-      pr.id as price_id,
-      pr.unit_amount,
-      pr.currency,
-      pr.recurring
-    FROM stripe.products p
-    JOIN stripe.prices pr ON pr.product = p.id
-    WHERE p.active = true AND pr.active = true AND p.metadata->>'tier' IS NOT NULL
-    ORDER BY (p.metadata->>'tier'), (pr.recurring->>'interval')
-  `);
+  const paddle = getPaddleClient();
+
+  const productMap = new Map<
+    string,
+    { tier: string; name: string; createLimit: number; uploadLimit: number }
+  >();
+
+  for await (const product of paddle.products.list({ status: ["active"] })) {
+    const customData = (product as any).customData as Record<string, string> | null;
+    if (!customData?.tier) continue;
+    productMap.set(product.id, {
+      tier: customData.tier,
+      name: product.name,
+      createLimit: Number(customData.createLimit) || 0,
+      uploadLimit: Number(customData.uploadLimit) || 0,
+    });
+  }
 
   const plansByTier = new Map<string, any>();
-  for (const row of result.rows as any[]) {
-    const tier = row.product_metadata?.tier;
-    if (!tier) continue;
+
+  for await (const price of paddle.prices.list({ status: ["active"] })) {
+    const productInfo = productMap.get((price as any).productId);
+    if (!productInfo) continue;
+
+    const { tier } = productInfo;
     if (!plansByTier.has(tier)) {
-      plansByTier.set(tier, {
-        tier,
-        name: row.product_name,
-        createLimit: Number(row.product_metadata?.createLimit) || 0,
-        uploadLimit: Number(row.product_metadata?.uploadLimit) || 0,
-        prices: [],
-      });
+      plansByTier.set(tier, { ...productInfo, prices: [] });
     }
+
+    const unitAmount = Math.round(
+      parseFloat((price as any).unitPrice?.amount ?? "0") * 100,
+    );
     plansByTier.get(tier).prices.push({
-      id: row.price_id,
-      unitAmount: row.unit_amount,
-      currency: row.currency,
-      interval: row.recurring?.interval ?? null,
+      id: price.id,
+      unitAmount,
+      currency: (price as any).unitPrice?.currencyCode ?? "USD",
+      interval: (price as any).billingCycle?.interval ?? null,
     });
   }
 
@@ -71,36 +75,52 @@ router.post("/billing/checkout", requireAuth, async (req: any, res) => {
 
   const auth = getAuth(req);
   const email = (auth?.sessionClaims as any)?.email ?? null;
-  const customerId = await getOrCreateStripeCustomer(req.userId, email);
+  const customerId = await getOrCreatePaddleCustomer(req.userId, email);
 
-  const stripe = await getUncachableStripeClient();
+  const paddle = getPaddleClient();
   const origin = `${req.protocol}://${req.get("host")}`;
-  const session = await stripe.checkout.sessions.create({
-    customer: customerId,
-    mode: "subscription",
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${origin}/profile?checkout=success`,
-    cancel_url: `${origin}/profile?checkout=cancel`,
+
+  const transaction = await paddle.transactions.create({
+    items: [{ priceId, quantity: 1 }],
+    customerId,
+    checkout: {
+      url: `${origin}/profile?checkout=success`,
+    },
   });
 
-  res.json({ url: session.url });
+  const checkoutUrl = (transaction as any).checkout?.url;
+  if (!checkoutUrl) {
+    res.status(500).json({ error: "Failed to generate checkout URL" });
+    return;
+  }
+
+  res.json({ url: checkoutUrl });
 });
 
 router.post("/billing/portal", requireAuth, async (req: any, res) => {
-  const customerId = await getStripeCustomerId(req.userId);
+  const customerId = await getPaddleCustomerId(req.userId);
   if (!customerId) {
     res.status(404).json({ error: "No billing account found" });
     return;
   }
 
-  const stripe = await getUncachableStripeClient();
-  const origin = `${req.protocol}://${req.get("host")}`;
-  const session = await stripe.billingPortal.sessions.create({
-    customer: customerId,
-    return_url: `${origin}/profile`,
+  const [sub] = await db
+    .select()
+    .from(paddleSubscriptionsTable)
+    .where(eq(paddleSubscriptionsTable.userId, req.userId));
+
+  const paddle = getPaddleClient();
+  const session = await paddle.customerPortalSessions.create(customerId, {
+    subscriptionIds: sub?.paddleSubscriptionId ? [sub.paddleSubscriptionId] : [],
   });
 
-  res.json({ url: session.url });
+  const portalUrl = (session as any).urls?.general?.overview;
+  if (!portalUrl) {
+    res.status(500).json({ error: "Failed to generate portal URL" });
+    return;
+  }
+
+  res.json({ url: portalUrl });
 });
 
 export default router;

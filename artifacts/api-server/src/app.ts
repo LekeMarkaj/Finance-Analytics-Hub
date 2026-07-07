@@ -36,34 +36,26 @@ app.use(
 
 app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 
-// Register Stripe webhook route BEFORE express.json() -- it needs the raw Buffer body.
+// Register Paddle webhook route BEFORE express.json() -- it needs the raw body.
 app.post(
-  "/api/stripe/webhook",
+  "/api/paddle/webhook",
   cors({ credentials: true, origin: true }),
   express.raw({ type: "application/json" }),
   async (req, res) => {
-    const signature = req.headers["stripe-signature"];
+    const signature = req.headers["paddle-signature"];
 
     if (!signature) {
-      res.status(400).json({ error: "Missing stripe-signature" });
+      res.status(400).json({ error: "Missing paddle-signature header" });
       return;
     }
 
     try {
       const sig = Array.isArray(signature) ? signature[0] : signature;
-
-      if (!Buffer.isBuffer(req.body)) {
-        logger.error(
-          "STRIPE WEBHOOK ERROR: req.body is not a Buffer. Ensure this route is registered before express.json().",
-        );
-        res.status(500).json({ error: "Webhook processing error" });
-        return;
-      }
-
-      await WebhookHandlers.processWebhook(req.body as Buffer, sig);
+      const body = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : String(req.body);
+      await WebhookHandlers.processPaddleWebhook(body, sig);
       res.status(200).json({ received: true });
     } catch (err) {
-      logger.error({ err }, "Stripe webhook error");
+      logger.error({ err }, "Paddle webhook error");
       res.status(400).json({ error: "Webhook processing error" });
     }
   },
