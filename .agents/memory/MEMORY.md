@@ -1,3 +1,4 @@
 - [Paddle SDK enum casing](paddle-sdk-enum.md) — Environment enum uses lowercase: `Environment.sandbox` / `Environment.production`, not capitalized.
 - [Paddle checkout email fix](paddle-checkout-email.md) — Clerk session claims may not carry email; always fetch via `clerkClient.users.getUser(userId).primaryEmailAddress.emailAddress`.
 - [Paddle portal sessions](paddle-portal-sessions.md) — Paddle Node SDK has no `customerPortalSessions` — must POST to `{apiBase}/customers/{id}/portal-sessions` via raw fetch.
+- [Paddle env key mismatch](paddle-env-key-mismatch.md) — live_ client token + live API key must use Environment.production, not sandbox — wrong env causes 403 on all Paddle SDK calls.

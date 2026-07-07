@@ -64,8 +64,14 @@ export default function PricingCards({ currentTier, onCheckoutStart }: PricingCa
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ priceId }),
       }),
-    onSuccess: (res: { url: string }) => {
-      window.location.href = res.url;
+    onSuccess: (res: { transactionId: string; url: string }) => {
+      import("@/lib/paddle").then(({ openPaddleCheckout, isPaddleReady }) => {
+        if (isPaddleReady()) {
+          openPaddleCheckout(res.transactionId);
+        } else {
+          window.location.href = res.url;
+        }
+      });
     },
     onError: (err: Error) => {
       toast({ title: "Could not start checkout", description: err.message, variant: "destructive" });

@@ -181,8 +181,14 @@ function usePendingCheckoutResume() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ priceId }),
     })
-      .then((res: { url: string }) => {
-        window.location.href = res.url;
+      .then((res: { transactionId: string; url: string }) => {
+        import("./lib/paddle").then(({ openPaddleCheckout, isPaddleReady }) => {
+          if (isPaddleReady()) {
+            openPaddleCheckout(res.transactionId);
+          } else {
+            window.location.href = res.url;
+          }
+        });
       })
       .catch((err: Error) => {
         toast({

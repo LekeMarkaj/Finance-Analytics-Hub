@@ -108,7 +108,7 @@ router.post("/billing/checkout", requireAuth, async (req: any, res) => {
     return;
   }
 
-  res.json({ url: checkoutUrl });
+  res.json({ transactionId: transaction.id, url: checkoutUrl });
 });
 
 router.post("/billing/portal", requireAuth, async (req: any, res) => {

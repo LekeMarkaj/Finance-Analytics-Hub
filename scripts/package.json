@@ -12,8 +12,5 @@
     "@types/node": "catalog:",
     "tsx": "catalog:"
   },
-  "dependencies": {
-    "stripe": "^22.3.0",
-    "stripe-replit-sync": "^1.0.0"
-  }
+  "dependencies": {}
 }
