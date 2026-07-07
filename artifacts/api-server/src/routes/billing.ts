@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { createClerkClient } from "@clerk/express";
+import { ApiError } from "@paddle/paddle-node-sdk";
 import { db, billingCustomersTable, paddleSubscriptionsTable } from "@workspace/db";
 import { requireAuth } from "../middlewares/auth";
 import {
@@ -95,10 +96,30 @@ router.post("/billing/checkout", requireAuth, async (req: any, res) => {
 
   const paddle = getPaddleClient();
 
-  const transaction = await paddle.transactions.create({
-    items: [{ priceId, quantity: 1 }],
-    customerId,
-  });
+  let transaction: Awaited<ReturnType<typeof paddle.transactions.create>>;
+  try {
+    transaction = await paddle.transactions.create({
+      items: [{ priceId, quantity: 1 }],
+      customerId,
+    });
+  } catch (err) {
+    if (err instanceof ApiError) {
+      console.error("[Paddle] transaction create failed", {
+        code: err.code,
+        detail: err.detail,
+        errors: err.errors,
+      });
+      res.status(500).json({
+        error: "Paddle rejected transaction",
+        detail: err.detail,
+        errors: err.errors,
+      });
+    } else {
+      console.error("[Paddle] transaction create unexpected error", err);
+      res.status(500).json({ error: "Could not start checkout" });
+    }
+    return;
+  }
 
   const checkoutUrl = transaction.checkout?.url;
   if (!checkoutUrl) {
