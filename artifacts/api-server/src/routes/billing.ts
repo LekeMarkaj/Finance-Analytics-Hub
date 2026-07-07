@@ -43,9 +43,7 @@ router.get("/billing/plans", async (_req, res) => {
       plansByTier.set(tier, { ...productInfo, prices: [] });
     }
 
-    const unitAmount = Math.round(
-      parseFloat((price as any).unitPrice?.amount ?? "0") * 100,
-    );
+    const unitAmount = parseInt((price as any).unitPrice?.amount ?? "0", 10);
     plansByTier.get(tier).prices.push({
       id: price.id,
       unitAmount,
