@@ -1,8 +1,3 @@
-- [PDF extraction library](pdf-extraction.md) — pdf-parse v2 crashes Node.js on startup (DOMMatrix); use unpdf instead
-- [Clerk test user id for DB-seeded e2e tests](clerk-test-userid.md) — no `/api/me`; drive tests through the real create flow instead of guessing userId to pre-seed rows.
-- [lib/db composite project rebuild](lib-db-composite-build.md) — after editing `lib/db` schema files, run `tsc -b --force` there or dependents see stale dist/types.
-- [Removing an OpenAPI-backed feature](openapi-feature-removal.md) — deleting a feature also requires trimming its paths/schemas from lib/api-spec/openapi.yaml, rerunning orval codegen, and force-rebuilding (rm -rf dist + tsc -b --force) generated lib dist folders, since tsc -b doesn't prune stale output files for deleted sources.
-- [Public share-link auth bypass](public-share-links-auth-bypass.md) — pattern for letting anonymous users view one resource read-only via link in an app that otherwise requires sign-in for every route.
-- [Stripe connector settings field names](stripe-connector-settings.md) — Replit-managed Stripe connection exposes `secret`/`publishable`, not `secret_key`/`webhook_secret`.
-- [stripe-replit-sync runMigrations schema quirk](stripe-replit-sync-migrations.md) — `schema` option is silently ignored; schema is hardcoded to `"stripe"`.
-- [Paddle billing integration](paddle-billing.md) — Paddle amounts are integer cents ("999" = $9.99); drizzle-kit push needs TTY workaround; products need customData.tier to be picked up by /billing/plans.
+- [Paddle SDK enum casing](paddle-sdk-enum.md) — Environment enum uses lowercase: `Environment.sandbox` / `Environment.production`, not capitalized.
+- [Paddle checkout email fix](paddle-checkout-email.md) — Clerk session claims may not carry email; always fetch via `clerkClient.users.getUser(userId).primaryEmailAddress.emailAddress`.
+- [Paddle portal sessions](paddle-portal-sessions.md) — Paddle Node SDK has no `customerPortalSessions` — must POST to `{apiBase}/customers/{id}/portal-sessions` via raw fetch.

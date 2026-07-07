@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { getAuth } from "@clerk/express";
 import { eq } from "drizzle-orm";
+import { createClerkClient } from "@clerk/express";
 import { db, billingCustomersTable, paddleSubscriptionsTable } from "@workspace/db";
 import { requireAuth } from "../middlewares/auth";
 import {
@@ -9,9 +9,23 @@ import {
   getUserPlan,
   getMonthlyUsage,
 } from "../lib/billing";
-import { getPaddleClient } from "../paddleClient";
+import { getPaddleClient, getPaddleApiBase } from "../paddleClient";
 
 const router: IRouter = Router();
+
+function getClerk() {
+  return createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+}
+
+async function getUserEmail(userId: string): Promise<string | null> {
+  try {
+    const clerk = getClerk();
+    const user = await clerk.users.getUser(userId);
+    return user.primaryEmailAddress?.emailAddress ?? null;
+  } catch {
+    return null;
+  }
+}
 
 router.get("/billing/plans", async (_req, res) => {
   const paddle = getPaddleClient();
@@ -71,8 +85,12 @@ router.post("/billing/checkout", requireAuth, async (req: any, res) => {
     return;
   }
 
-  const auth = getAuth(req);
-  const email = (auth?.sessionClaims as any)?.email ?? null;
+  const email = await getUserEmail(req.userId);
+  if (!email) {
+    res.status(400).json({ error: "Could not resolve user email for billing" });
+    return;
+  }
+
   const customerId = await getOrCreatePaddleCustomer(req.userId, email);
 
   const paddle = getPaddleClient();
@@ -81,12 +99,10 @@ router.post("/billing/checkout", requireAuth, async (req: any, res) => {
   const transaction = await paddle.transactions.create({
     items: [{ priceId, quantity: 1 }],
     customerId,
-    checkout: {
-      url: `${origin}/profile?checkout=success`,
-    },
+    checkout: { url: `${origin}/profile?checkout=success` },
   });
 
-  const checkoutUrl = (transaction as any).checkout?.url;
+  const checkoutUrl = transaction.checkout?.url;
   if (!checkoutUrl) {
     res.status(500).json({ error: "Failed to generate checkout URL" });
     return;
@@ -107,12 +123,33 @@ router.post("/billing/portal", requireAuth, async (req: any, res) => {
     .from(paddleSubscriptionsTable)
     .where(eq(paddleSubscriptionsTable.userId, req.userId));
 
-  const paddle = getPaddleClient();
-  const session = await paddle.customerPortalSessions.create(customerId, {
-    subscriptionIds: sub?.paddleSubscriptionId ? [sub.paddleSubscriptionId] : [],
-  });
+  const apiBase = getPaddleApiBase();
+  const apiKey = process.env.PADDLE_API_KEY!;
 
-  const portalUrl = (session as any).urls?.general?.overview;
+  const resp = await fetch(
+    `${apiBase}/customers/${customerId}/portal-sessions`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        subscription_ids: sub?.paddleSubscriptionId
+          ? [sub.paddleSubscriptionId]
+          : [],
+      }),
+    },
+  );
+
+  if (!resp.ok) {
+    const text = await resp.text();
+    res.status(502).json({ error: "Paddle portal error", detail: text });
+    return;
+  }
+
+  const json = (await resp.json()) as any;
+  const portalUrl = json?.data?.urls?.general?.overview;
   if (!portalUrl) {
     res.status(500).json({ error: "Failed to generate portal URL" });
     return;
