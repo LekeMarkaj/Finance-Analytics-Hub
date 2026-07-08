@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@clerk/react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -51,11 +51,22 @@ export default function PricingCards({ currentTier, onCheckoutStart }: PricingCa
   const { isSignedIn } = useUser();
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery<PlansResponse>({
     queryKey: ["billingPlans"],
     queryFn: () => apiFetch("/billing/plans"),
   });
+
+  const handleCheckoutComplete = useCallback(() => {
+    toast({ title: "Payment complete!", description: "Activating your plan — this takes a moment…" });
+    let attempts = 0;
+    const poll = setInterval(() => {
+      attempts++;
+      queryClient.invalidateQueries({ queryKey: ["billingMe"] });
+      if (attempts >= 8) clearInterval(poll);
+    }, 2500);
+  }, [queryClient, toast]);
 
   const checkoutMutation = useMutation({
     mutationFn: (priceId: string) =>
@@ -67,7 +78,7 @@ export default function PricingCards({ currentTier, onCheckoutStart }: PricingCa
     onSuccess: (res: { customerId: string; priceId: string }) => {
       import("@/lib/paddle").then(({ openPaddleCheckout, isPaddleReady }) => {
         if (isPaddleReady()) {
-          openPaddleCheckout(res.priceId, res.customerId);
+          openPaddleCheckout(res.priceId, res.customerId, handleCheckoutComplete);
         } else {
           console.error("Paddle.js not ready — cannot open checkout");
         }

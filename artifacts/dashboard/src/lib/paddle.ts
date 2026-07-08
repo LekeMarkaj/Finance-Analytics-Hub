@@ -14,6 +14,7 @@ declare global {
 }
 
 let initialized = false;
+let checkoutCompleteCallback: (() => void) | null = null;
 
 export function initPaddle(): void {
   if (initialized || !window.Paddle) return;
@@ -30,21 +31,27 @@ export function initPaddle(): void {
     token,
     eventCallback: (data: any) => {
       console.warn("[Paddle] event:", data.name, JSON.stringify(data));
+      if (data.name === "checkout.completed" && checkoutCompleteCallback) {
+        checkoutCompleteCallback();
+        checkoutCompleteCallback = null;
+      }
     },
   });
   initialized = true;
 }
 
-export function openPaddleCheckout(priceId: string, customerId?: string): void {
-  // Ensure Paddle is initialized — initPaddle() is a no-op if already done,
-  // but calling it here handles the case where window.Paddle wasn't available
-  // at module-load time (main.tsx calls initPaddle() too early).
+export function openPaddleCheckout(
+  priceId: string,
+  customerId?: string,
+  onComplete?: () => void,
+): void {
   initPaddle();
 
   if (!window.Paddle) {
     console.error("Paddle.js not loaded");
     return;
   }
+  checkoutCompleteCallback = onComplete ?? null;
   window.Paddle.Checkout.open({
     items: [{ priceId, quantity: 1 }],
     ...(customerId ? { customer: { id: customerId } } : {}),
