@@ -64,12 +64,12 @@ export default function PricingCards({ currentTier, onCheckoutStart }: PricingCa
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ priceId }),
       }),
-    onSuccess: (res: { transactionId: string; url: string }) => {
+    onSuccess: (res: { customerId: string; priceId: string }) => {
       import("@/lib/paddle").then(({ openPaddleCheckout, isPaddleReady }) => {
         if (isPaddleReady()) {
-          openPaddleCheckout(res.transactionId);
+          openPaddleCheckout(res.priceId, res.customerId);
         } else {
-          window.location.href = res.url;
+          console.error("Paddle.js not ready — cannot open checkout");
         }
       });
     },

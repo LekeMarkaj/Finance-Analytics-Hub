@@ -3,7 +3,7 @@ declare global {
     Paddle?: {
       Initialize: (opts: { token: string; eventCallback?: (data: any) => void }) => void;
       Checkout: {
-        open: (opts: { transactionId: string }) => void;
+        open: (opts: { transactionId: string } | { items: { priceId: string; quantity: number }[]; customer?: { id: string } }) => void;
         close: () => void;
       };
       Environment: {
@@ -30,12 +30,15 @@ export function initPaddle(): void {
   initialized = true;
 }
 
-export function openPaddleCheckout(transactionId: string): void {
+export function openPaddleCheckout(priceId: string, customerId?: string): void {
   if (!window.Paddle) {
     console.error("Paddle.js not loaded");
     return;
   }
-  window.Paddle.Checkout.open({ transactionId });
+  window.Paddle.Checkout.open({
+    items: [{ priceId, quantity: 1 }],
+    ...(customerId ? { customer: { id: customerId } } : {}),
+  });
 }
 
 export function isPaddleReady(): boolean {

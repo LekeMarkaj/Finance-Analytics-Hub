@@ -94,44 +94,10 @@ router.post("/billing/checkout", requireAuth, async (req: any, res) => {
 
   const customerId = await getOrCreatePaddleCustomer(req.userId, email);
 
-  const paddle = getPaddleClient();
-
-  const host = process.env.REPLIT_DEV_DOMAIN ?? process.env.REPLIT_DOMAINS ?? "";
-  const successUrl = host ? `https://${host}/?checkout=success` : undefined;
-
-  let transaction: Awaited<ReturnType<typeof paddle.transactions.create>>;
-  try {
-    transaction = await paddle.transactions.create({
-      items: [{ priceId, quantity: 1 }],
-      customerId,
-      ...(successUrl ? { checkout: { successUrl } } : {}),
-    });
-  } catch (err) {
-    if (err instanceof ApiError) {
-      console.error("[Paddle] transaction create failed", {
-        code: err.code,
-        detail: err.detail,
-        errors: err.errors,
-      });
-      res.status(500).json({
-        error: "Paddle rejected transaction",
-        detail: err.detail,
-        errors: err.errors,
-      });
-    } else {
-      console.error("[Paddle] transaction create unexpected error", err);
-      res.status(500).json({ error: "Could not start checkout" });
-    }
-    return;
-  }
-
-  const checkoutUrl = transaction.checkout?.url;
-  if (!checkoutUrl) {
-    res.status(500).json({ error: "Failed to generate checkout URL" });
-    return;
-  }
-
-  res.json({ transactionId: transaction.id, url: checkoutUrl });
+  // Return customer + price so the frontend can open Paddle.js checkout
+  // client-side — no server-side transaction creation needed, which avoids
+  // the 'transaction_default_checkout_url_not_set' Paddle requirement.
+  res.json({ customerId, priceId });
 });
 
 router.post("/billing/portal", requireAuth, async (req: any, res) => {
