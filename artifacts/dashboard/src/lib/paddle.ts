@@ -26,7 +26,12 @@ export function initPaddle(): void {
   if (paddleEnv === "sandbox") {
     window.Paddle.Environment.set("sandbox");
   }
-  window.Paddle.Initialize({ token });
+  window.Paddle.Initialize({
+    token,
+    eventCallback: (data: any) => {
+      console.warn("[Paddle] event:", data.name, JSON.stringify(data));
+    },
+  });
   initialized = true;
 }
 
@@ -42,7 +47,6 @@ export function openPaddleCheckout(priceId: string, customerId?: string): void {
   }
   window.Paddle.Checkout.open({
     items: [{ priceId, quantity: 1 }],
-    ...(customerId ? { customer: { id: customerId } } : {}),
   });
 }
 
