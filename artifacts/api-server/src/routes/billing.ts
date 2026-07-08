@@ -96,11 +96,15 @@ router.post("/billing/checkout", requireAuth, async (req: any, res) => {
 
   const paddle = getPaddleClient();
 
+  const host = process.env.REPLIT_DEV_DOMAIN ?? process.env.REPLIT_DOMAINS ?? "";
+  const successUrl = host ? `https://${host}/?checkout=success` : undefined;
+
   let transaction: Awaited<ReturnType<typeof paddle.transactions.create>>;
   try {
     transaction = await paddle.transactions.create({
       items: [{ priceId, quantity: 1 }],
       customerId,
+      ...(successUrl ? { checkout: { successUrl } } : {}),
     });
   } catch (err) {
     if (err instanceof ApiError) {
