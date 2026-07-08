@@ -47,6 +47,7 @@ export function openPaddleCheckout(priceId: string, customerId?: string): void {
   }
   window.Paddle.Checkout.open({
     items: [{ priceId, quantity: 1 }],
+    ...(customerId ? { customer: { id: customerId } } : {}),
   });
 }
 
