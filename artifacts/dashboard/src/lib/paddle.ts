@@ -31,6 +31,11 @@ export function initPaddle(): void {
 }
 
 export function openPaddleCheckout(priceId: string, customerId?: string): void {
+  // Ensure Paddle is initialized — initPaddle() is a no-op if already done,
+  // but calling it here handles the case where window.Paddle wasn't available
+  // at module-load time (main.tsx calls initPaddle() too early).
+  initPaddle();
+
   if (!window.Paddle) {
     console.error("Paddle.js not loaded");
     return;

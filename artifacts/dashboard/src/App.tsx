@@ -181,12 +181,12 @@ function usePendingCheckoutResume() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ priceId }),
     })
-      .then((res: { transactionId: string; url: string }) => {
+      .then((res: { customerId: string; priceId: string }) => {
         import("./lib/paddle").then(({ openPaddleCheckout, isPaddleReady }) => {
           if (isPaddleReady()) {
-            openPaddleCheckout(res.transactionId);
+            openPaddleCheckout(res.priceId, res.customerId);
           } else {
-            window.location.href = res.url;
+            console.error("Paddle.js not ready — cannot resume checkout");
           }
         });
       })
