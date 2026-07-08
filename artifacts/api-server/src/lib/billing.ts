@@ -21,12 +21,21 @@ function currentMonthKey(): string {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
+const PADDLE_CUSTOMER_ID_PATTERN = /^ctm_[a-z\d]{26}$/;
+
 export async function getPaddleCustomerId(userId: string): Promise<string | null> {
   const [row] = await db
     .select()
     .from(billingCustomersTable)
     .where(eq(billingCustomersTable.userId, userId));
-  return row?.paddleCustomerId ?? null;
+  const stored = row?.paddleCustomerId ?? null;
+  if (stored && !PADDLE_CUSTOMER_ID_PATTERN.test(stored)) {
+    // Stale/invalid customer id (e.g. left over from a different Paddle
+    // environment or a failed earlier attempt). Treat as if none exists so
+    // a fresh, valid customer gets created for the current environment.
+    return null;
+  }
+  return stored;
 }
 
 export async function getOrCreatePaddleCustomer(
@@ -43,7 +52,10 @@ export async function getOrCreatePaddleCustomer(
   await db
     .insert(billingCustomersTable)
     .values({ userId, paddleCustomerId: customer.id })
-    .onConflictDoNothing();
+    .onConflictDoUpdate({
+      target: billingCustomersTable.userId,
+      set: { paddleCustomerId: customer.id },
+    });
 
   return (await getPaddleCustomerId(userId)) ?? customer.id;
 }
