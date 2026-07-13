@@ -14,6 +14,11 @@ import Profile from "@/pages/Profile";
 import AdminUsers from "@/pages/AdminUsers";
 import PdfUpload from "@/pages/PdfUpload";
 import NotFound from "@/pages/not-found";
+import Terms from "@/pages/legal/Terms";
+import Privacy from "@/pages/legal/Privacy";
+import RefundPolicy from "@/pages/legal/RefundPolicy";
+import Contact from "@/pages/legal/Contact";
+import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import PricingCards from "@/components/PricingCards";
 import { Link } from "wouter";
@@ -145,6 +150,7 @@ function LandingPage() {
           <PricingCards />
         </div>
       </section>
+      <SiteFooter />
     </div>
   );
 }
@@ -353,6 +359,10 @@ function ClerkProviderWithRoutes() {
             <Route path="/" component={HomeRoute} />
             <Route path="/sign-in/*?" component={SignInPage} />
             <Route path="/sign-up/*?" component={SignUpPage} />
+            <Route path="/terms" component={Terms} />
+            <Route path="/privacy" component={Privacy} />
+            <Route path="/refund-policy" component={RefundPolicy} />
+            <Route path="/contact" component={Contact} />
             <Route component={AppShell} />
           </Switch>
           <Toaster />
