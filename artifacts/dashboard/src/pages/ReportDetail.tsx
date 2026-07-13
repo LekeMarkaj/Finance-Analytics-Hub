@@ -24,7 +24,10 @@ function StatusBadge({ status }: { status: PdfUpload["status"] }) {
 
 export default function ReportDetailPage() {
   const [location, navigate] = useLocation();
-  const id = location.split("/")[2];
+  const parts = location.split("/");
+  const isSharePath = parts[2] === "share";
+  const id = isSharePath ? parts[3] : parts[2];
+  const apiPath = isSharePath ? `/pdf-uploads/share/${id}` : `/pdf-uploads/${id}`;
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -36,7 +39,7 @@ export default function ReportDetailPage() {
 
   const { data: report, isLoading, error } = useQuery<PdfUpload>({
     queryKey: ["pdfUpload", id],
-    queryFn: () => apiFetch(`/pdf-uploads/${id}`),
+    queryFn: () => apiFetch(apiPath),
     refetchInterval: (query) => {
       if (query.state.data?.status === "processing") return 2000;
       return false;

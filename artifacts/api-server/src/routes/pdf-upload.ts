@@ -198,21 +198,33 @@ router.get("/pdf-uploads", requireAuth, async (req: any, res: any): Promise<void
   res.json(rows.map(uploadToApi));
 });
 
-router.get("/pdf-uploads/:id", optionalAuth, async (req: any, res: any): Promise<void> => {
-  const id = Number(req.params.id);
+router.get("/pdf-uploads/share/:token", async (req: any, res: any): Promise<void> => {
   const [row] = await db
     .select()
     .from(pdfUploadsTable)
-    .where(eq(pdfUploadsTable.id, id));
+    .where(eq(pdfUploadsTable.shareToken, req.params.token));
 
-  const isOwner = !!row && !!req.userId && row.userId === req.userId;
-
-  if (!row || (!isOwner && !row.isPublic)) {
+  if (!row || !row.isPublic) {
     res.status(404).json({ error: "Not found" });
     return;
   }
 
-  res.json({ ...uploadToApi(row), isOwner });
+  res.json({ ...uploadToApi(row), isOwner: false });
+});
+
+router.get("/pdf-uploads/:id", requireAuth, async (req: any, res: any): Promise<void> => {
+  const id = Number(req.params.id);
+  const [row] = await db
+    .select()
+    .from(pdfUploadsTable)
+    .where(and(eq(pdfUploadsTable.id, id), eq(pdfUploadsTable.userId, req.userId)));
+
+  if (!row) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
+
+  res.json({ ...uploadToApi(row), isOwner: true });
 });
 
 router.patch("/pdf-uploads/:id/visibility", requireAuth, async (req: any, res: any): Promise<void> => {
@@ -289,6 +301,7 @@ router.delete("/pdf-uploads/:id", requireAuth, async (req: any, res: any): Promi
 function uploadToApi(row: typeof pdfUploadsTable.$inferSelect) {
   return {
     id: row.id,
+    shareToken: row.shareToken,
     fileName: row.fileName,
     status: row.status,
     errorMessage: row.errorMessage,

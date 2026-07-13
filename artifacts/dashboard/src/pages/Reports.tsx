@@ -74,7 +74,7 @@ function ReportCard({ upload, onDelete, deleting }: {
   const handleCopyLink = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const url = `${window.location.origin}/reports/${upload.id}`;
+    const url = `${window.location.origin}/reports/share/${upload.shareToken}`;
     navigator.clipboard.writeText(url).then(() => {
       toast({ title: "Link copied" });
     });

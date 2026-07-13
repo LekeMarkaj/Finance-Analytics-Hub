@@ -1,6 +1,7 @@
 import { pgTable, serial, text, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { randomUUID } from "crypto";
 
 export const pdfUploadsTable = pgTable("pdf_uploads", {
   id: serial("id").primaryKey(),
@@ -10,6 +11,7 @@ export const pdfUploadsTable = pgTable("pdf_uploads", {
   errorMessage: text("error_message"),
   extractedData: jsonb("extracted_data"),
   isPublic: boolean("is_public").notNull().default(false),
+  shareToken: text("share_token").notNull().unique().$defaultFn(() => randomUUID()),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

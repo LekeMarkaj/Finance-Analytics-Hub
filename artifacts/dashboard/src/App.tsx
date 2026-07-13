@@ -169,7 +169,7 @@ function HomeRoute() {
 }
 
 function isPublicReportPath(location: string): boolean {
-  return /^\/reports\/[^/]+$/.test(location);
+  return /^\/reports\/share\/[^/]+$/.test(location);
 }
 
 function usePendingCheckoutResume() {
@@ -224,15 +224,19 @@ function BareReportView() {
 // layout) view until we can positively confirm the viewer is the owner.
 function ReportDetailRoute() {
   const [location] = useLocation();
-  const id = location.split("/")[2];
+  const parts = location.split("/");
+  const isSharePath = parts[2] === "share";
+  const id = isSharePath ? parts[3] : parts[2];
 
   const { data: report, isLoading } = useQuery<PdfUploadRecord>({
     queryKey: ["pdfUpload", id],
-    queryFn: () => apiFetch(`/pdf-uploads/${id}`),
-    enabled: !!id,
+    queryFn: () => isSharePath
+      ? apiFetch(`/pdf-uploads/share/${id}`)
+      : apiFetch(`/pdf-uploads/${id}`),
+    enabled: !!id && !isSharePath,
   });
 
-  if (isLoading || !report || report.isOwner === false) {
+  if (isSharePath || isLoading || !report || report.isOwner === false) {
     return <BareReportView />;
   }
 

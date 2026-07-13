@@ -8,6 +8,7 @@ export interface ExtractedSection { name: string; chartType: "bar" | "line" | "p
 export interface ExtractedData { title: string; summary: string; currency: string; sections: ExtractedSection[]; }
 export interface PdfUpload {
   id: number;
+  shareToken: string;
   fileName: string;
   status: "processing" | "done" | "error";
   errorMessage?: string;
