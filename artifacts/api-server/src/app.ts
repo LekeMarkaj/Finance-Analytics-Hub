@@ -11,6 +11,7 @@ import {
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { WebhookHandlers } from "./webhookHandlers";
+import { paddleIpAllowlist } from "./middlewares/paddleIpAllowlist";
 
 const app: Express = express();
 
@@ -39,6 +40,7 @@ app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 // Register Paddle webhook route BEFORE express.json() -- it needs the raw body.
 app.post(
   "/api/paddle/webhook",
+  paddleIpAllowlist,
   cors({ credentials: true, origin: true }),
   express.raw({ type: "application/json" }),
   async (req, res) => {

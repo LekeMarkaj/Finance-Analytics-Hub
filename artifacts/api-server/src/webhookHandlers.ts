@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db, billingCustomersTable, paddleSubscriptionsTable } from "@workspace/db";
 import type { PlanTier } from "@workspace/db";
-import { getPaddleClient } from "./paddleClient";
+import { getPaddleClient, getPaddleWebhookSecret } from "./paddleClient";
 
 const SUBSCRIPTION_EVENTS = new Set([
   "subscription.created",
@@ -11,10 +11,7 @@ const SUBSCRIPTION_EVENTS = new Set([
 
 export class WebhookHandlers {
   static async processPaddleWebhook(rawBody: string, signature: string): Promise<void> {
-    const webhookSecret = process.env.PADDLE_WEBHOOK_SECRET;
-    if (!webhookSecret) {
-      throw new Error("PADDLE_WEBHOOK_SECRET is not set.");
-    }
+    const webhookSecret = getPaddleWebhookSecret();
 
     const paddle = getPaddleClient();
     const event = paddle.webhooks.unmarshal(rawBody, webhookSecret, signature);

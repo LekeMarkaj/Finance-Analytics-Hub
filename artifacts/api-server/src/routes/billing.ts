@@ -10,7 +10,7 @@ import {
   getUserPlan,
   getMonthlyUsage,
 } from "../lib/billing";
-import { getPaddleClient, getPaddleApiBase } from "../paddleClient";
+import { getPaddleClient, getPaddleApiBase, getPaddleApiKey } from "../paddleClient";
 
 const router: IRouter = Router();
 
@@ -76,7 +76,9 @@ router.get("/billing/plans", async (_req, res) => {
 router.get("/billing/me", requireAuth, async (req: any, res) => {
   const plan = await getUserPlan(req.userId);
   const usage = await getMonthlyUsage(req.userId);
-  res.json({ plan, usage });
+  // paddleCustomerId is used by the frontend as pwCustomer for Paddle Retain.
+  const paddleCustomerId = await getPaddleCustomerId(req.userId);
+  res.json({ plan, usage, paddleCustomerId });
 });
 
 router.post("/billing/checkout", requireAuth, async (req: any, res) => {
@@ -113,7 +115,7 @@ router.post("/billing/portal", requireAuth, async (req: any, res) => {
     .where(eq(paddleSubscriptionsTable.userId, req.userId));
 
   const apiBase = getPaddleApiBase();
-  const apiKey = process.env.PADDLE_API_KEY!;
+  const apiKey = getPaddleApiKey();
 
   const resp = await fetch(
     `${apiBase}/customers/${customerId}/portal-sessions`,

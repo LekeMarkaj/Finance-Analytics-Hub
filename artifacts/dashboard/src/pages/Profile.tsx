@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useUser } from "@clerk/react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +26,7 @@ interface UserPlan {
 interface BillingMe {
   plan: UserPlan;
   usage: { creates: number; uploads: number };
+  paddleCustomerId: string | null;
 }
 
 const TIER_LABELS: Record<UserPlan["tier"], string> = {
@@ -55,6 +56,15 @@ function PlanUsageSection() {
     queryKey: ["billingMe"],
     queryFn: () => apiFetch("/billing/me"),
   });
+
+  // Identify the signed-in customer to Paddle Retain (pwCustomer).
+  useEffect(() => {
+    if (data?.paddleCustomerId) {
+      import("@/lib/paddle").then(({ setPaddleCustomer }) => {
+        setPaddleCustomer(data.paddleCustomerId);
+      });
+    }
+  }, [data?.paddleCustomerId]);
 
   const portalMutation = useMutation({
     mutationFn: () => apiFetch("/billing/portal", { method: "POST" }),

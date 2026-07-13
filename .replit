@@ -38,6 +38,12 @@ channel = "stable-25_05"
 [userenv]
 
 [userenv.shared]
-VITE_PADDLE_CLIENT_TOKEN = "test_1cf4b35583b5ec031b9c99ac4f3"
+
+[userenv.development]
 PADDLE_ENVIRONMENT = "sandbox"
 VITE_PADDLE_ENVIRONMENT = "sandbox"
+VITE_PADDLE_CLIENT_TOKEN = "test_1cf4b35583b5ec031b9c99ac4f3"
+
+[userenv.production]
+PADDLE_ENVIRONMENT = "production"
+VITE_PADDLE_ENVIRONMENT = "production"
