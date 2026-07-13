@@ -69,24 +69,44 @@ async function getAllowedCidrs(): Promise<string[] | null> {
   return cachedCidrs;
 }
 
-function candidateIps(req: Request): string[] {
-  const ips = new Set<string>();
-  const remote = req.socket.remoteAddress;
-  if (remote) ips.add(normalizeIp(remote));
-  const xff = req.headers["x-forwarded-for"];
-  const chain = Array.isArray(xff) ? xff.join(",") : xff;
-  if (chain) {
-    for (const entry of chain.split(",")) {
-      const trimmed = entry.trim();
-      if (trimmed) ips.add(normalizeIp(trimmed));
-    }
-  }
-  return Array.from(ips);
-}
-
 function normalizeIp(ip: string): string {
   // Strip IPv4-mapped IPv6 prefix (::ffff:1.2.3.4)
   return ip.startsWith("::ffff:") ? ip.slice(7) : ip;
+}
+
+const PRIVATE_CIDRS = [
+  "10.0.0.0/8",
+  "172.16.0.0/12",
+  "192.168.0.0/16",
+  "127.0.0.0/8",
+  "169.254.0.0/16",
+  "100.64.0.0/10",
+];
+
+function isPrivateOrLocal(ip: string): boolean {
+  if (ipv4ToInt(ip) === null) return true; // non-IPv4 (e.g. IPv6 internal hops)
+  return PRIVATE_CIDRS.some((cidr) => ipInCidr(ip, cidr));
+}
+
+/**
+ * Determines the real client IP. X-Forwarded-For entries left of the last
+ * trusted hop are attacker-controlled (a client can send its own XFF header,
+ * which proxies prepend to). So we walk the chain from the right — starting
+ * with the entries appended by our own proxy — and take the first public IP.
+ */
+function clientIp(req: Request): string | null {
+  const xff = req.headers["x-forwarded-for"];
+  const chain = Array.isArray(xff) ? xff.join(",") : xff;
+  const hops = (chain ?? "")
+    .split(",")
+    .map((e) => normalizeIp(e.trim()))
+    .filter(Boolean);
+  const remote = req.socket.remoteAddress;
+  if (remote) hops.push(normalizeIp(remote));
+  for (let i = hops.length - 1; i >= 0; i--) {
+    if (!isPrivateOrLocal(hops[i])) return hops[i];
+  }
+  return null;
 }
 
 /**
@@ -111,10 +131,10 @@ export async function paddleIpAllowlist(
       next();
       return;
     }
-    const ips = candidateIps(req);
-    const allowed = ips.some((ip) => cidrs.some((cidr) => ipInCidr(ip, cidr)));
+    const ip = clientIp(req);
+    const allowed = ip !== null && cidrs.some((cidr) => ipInCidr(ip, cidr));
     if (!allowed) {
-      logger.warn({ ips }, "Rejected webhook from non-Paddle IP");
+      logger.warn({ ip }, "Rejected webhook from non-Paddle IP");
       res.status(403).json({ error: "Forbidden" });
       return;
     }

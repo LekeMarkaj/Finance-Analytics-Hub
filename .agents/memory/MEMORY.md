@@ -1,4 +1,12 @@
+- [Paddle billing gotchas](paddle-billing.md) — key @paddle/paddle-node-sdk quirks for this project's billing integration.
 - [Paddle SDK enum casing](paddle-sdk-enum.md) — Environment enum uses lowercase: `Environment.sandbox` / `Environment.production`, not capitalized.
 - [Paddle checkout email fix](paddle-checkout-email.md) — Clerk session claims may not carry email; always fetch via `clerkClient.users.getUser(userId).primaryEmailAddress.emailAddress`.
 - [Paddle portal sessions](paddle-portal-sessions.md) — Paddle Node SDK has no `customerPortalSessions` — must POST to `{apiBase}/customers/{id}/portal-sessions` via raw fetch.
 - [Paddle env key mismatch](paddle-env-key-mismatch.md) — live_ client token + live API key must use Environment.production, not sandbox — wrong env causes 403 on all Paddle SDK calls.
+- [PDF extraction library](pdf-extraction.md) — which Node.js PDF text extraction library works in this monorepo's ESM + esbuild setup.
+- [Clerk test user id for e2e](clerk-test-userid.md) — how to seed per-user rows owned by the right user when e2e testing Clerk-authed features.
+- [lib/db composite rebuild](lib-db-composite-build.md) — dependent packages see stale types after editing lib/db schema until the composite project is rebuilt.
+- [OpenAPI feature removal](openapi-feature-removal.md) — steps to fully remove a feature whose types/hooks are generated from lib/api-spec/openapi.yaml via orval.
+- [Public share-link pattern](public-share-links-auth-bypass.md) — anonymous read-only access to a single resource in an otherwise sign-in-required app.
+- [Stripe connector settings](stripe-connector-settings.md) — field names the Replit-managed Stripe connection actually exposes vs generic templates.
+- [stripe-replit-sync migrations](stripe-replit-sync-migrations.md) — the schema option passed to runMigrations() is silently ignored.
