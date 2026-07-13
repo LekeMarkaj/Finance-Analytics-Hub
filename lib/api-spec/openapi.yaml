@@ -39,6 +39,8 @@ paths:
   /budget-categories:
     get:
       operationId: listBudgetCategories
+      security:
+        - bearerAuth: []
       tags: [budget-categories]
       summary: List all budget categories
       parameters:
@@ -57,6 +59,8 @@ paths:
                   $ref: "#/components/schemas/BudgetCategory"
     post:
       operationId: createBudgetCategory
+      security:
+        - bearerAuth: []
       tags: [budget-categories]
       summary: Create a budget category
       requestBody:
@@ -76,6 +80,8 @@ paths:
   /budget-categories/{id}:
     get:
       operationId: getBudgetCategory
+      security:
+        - bearerAuth: []
       tags: [budget-categories]
       summary: Get a budget category
       parameters:
@@ -99,6 +105,8 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
     put:
       operationId: updateBudgetCategory
+      security:
+        - bearerAuth: []
       tags: [budget-categories]
       summary: Update a budget category
       parameters:
@@ -128,6 +136,8 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
     delete:
       operationId: deleteBudgetCategory
+      security:
+        - bearerAuth: []
       tags: [budget-categories]
       summary: Delete a budget category
       parameters:
@@ -149,6 +159,8 @@ paths:
   /budget-line-items:
     get:
       operationId: listBudgetLineItems
+      security:
+        - bearerAuth: []
       tags: [budget-line-items]
       summary: List budget line items
       parameters:
@@ -171,6 +183,8 @@ paths:
                   $ref: "#/components/schemas/BudgetLineItem"
     post:
       operationId: createBudgetLineItem
+      security:
+        - bearerAuth: []
       tags: [budget-line-items]
       summary: Create a budget line item
       requestBody:
@@ -190,6 +204,8 @@ paths:
   /budget-line-items/{id}:
     get:
       operationId: getBudgetLineItem
+      security:
+        - bearerAuth: []
       tags: [budget-line-items]
       summary: Get a budget line item
       parameters:
@@ -213,6 +229,8 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
     put:
       operationId: updateBudgetLineItem
+      security:
+        - bearerAuth: []
       tags: [budget-line-items]
       summary: Update a budget line item
       parameters:
@@ -242,6 +260,8 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
     delete:
       operationId: deleteBudgetLineItem
+      security:
+        - bearerAuth: []
       tags: [budget-line-items]
       summary: Delete a budget line item
       parameters:
@@ -263,6 +283,8 @@ paths:
   /yearly-comparisons:
     get:
       operationId: listYearlyComparisons
+      security:
+        - bearerAuth: []
       tags: [yearly-comparisons]
       summary: List yearly budget vs spending comparisons
       responses:
@@ -276,6 +298,8 @@ paths:
                   $ref: "#/components/schemas/YearlyComparison"
     post:
       operationId: createYearlyComparison
+      security:
+        - bearerAuth: []
       tags: [yearly-comparisons]
       summary: Create a yearly comparison entry
       requestBody:
@@ -295,6 +319,8 @@ paths:
   /yearly-comparisons/{id}:
     put:
       operationId: updateYearlyComparison
+      security:
+        - bearerAuth: []
       tags: [yearly-comparisons]
       summary: Update a yearly comparison entry
       parameters:
@@ -324,6 +350,8 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
     delete:
       operationId: deleteYearlyComparison
+      security:
+        - bearerAuth: []
       tags: [yearly-comparisons]
       summary: Delete a yearly comparison
       parameters:
@@ -339,6 +367,8 @@ paths:
   /own-revenues:
     get:
       operationId: listOwnRevenues
+      security:
+        - bearerAuth: []
       tags: [own-revenues]
       summary: List own revenue items
       parameters:
@@ -357,6 +387,8 @@ paths:
                   $ref: "#/components/schemas/OwnRevenue"
     post:
       operationId: createOwnRevenue
+      security:
+        - bearerAuth: []
       tags: [own-revenues]
       summary: Create an own revenue item
       requestBody:
@@ -376,6 +408,8 @@ paths:
   /own-revenues/{id}:
     put:
       operationId: updateOwnRevenue
+      security:
+        - bearerAuth: []
       tags: [own-revenues]
       summary: Update an own revenue item
       parameters:
@@ -405,6 +439,8 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
     delete:
       operationId: deleteOwnRevenue
+      security:
+        - bearerAuth: []
       tags: [own-revenues]
       summary: Delete an own revenue item
       parameters:
@@ -420,6 +456,8 @@ paths:
   /balance-sheet:
     get:
       operationId: listBalanceSheetItems
+      security:
+        - bearerAuth: []
       tags: [balance-sheet]
       summary: List balance sheet items
       parameters:
@@ -440,6 +478,8 @@ paths:
   /summary/utilization:
     get:
       operationId: getBudgetUtilizationSummary
+      security:
+        - bearerAuth: []
       tags: [summary]
       summary: Get aggregated budget utilization summary
       parameters:
@@ -458,6 +498,8 @@ paths:
   /summary/trend:
     get:
       operationId: getYearlyTrend
+      security:
+        - bearerAuth: []
       tags: [summary]
       summary: Get yearly budget vs spending trend data
       responses:
@@ -471,6 +513,13 @@ paths:
                   $ref: "#/components/schemas/YearlyComparison"
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Clerk session token
+
   schemas:
     HealthStatus:
       type: object

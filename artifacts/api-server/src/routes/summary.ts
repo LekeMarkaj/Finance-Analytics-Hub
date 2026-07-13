@@ -1,13 +1,18 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { budgetCategoriesTable, yearlyComparisonsTable } from "@workspace/db";
-import { eq, asc, sum } from "drizzle-orm";
+import { eq, and, asc } from "drizzle-orm";
+import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
-router.get("/summary/utilization", async (req, res): Promise<void> => {
+router.get("/summary/utilization", requireAuth, async (req: any, res): Promise<void> => {
   const year = req.query.year ? Number(req.query.year) : 2025;
-  const categories = await db.select().from(budgetCategoriesTable).where(eq(budgetCategoriesTable.year, year));
+  const userId: string = req.userId;
+  const categories = await db
+    .select()
+    .from(budgetCategoriesTable)
+    .where(and(eq(budgetCategoriesTable.userId, userId), eq(budgetCategoriesTable.year, year)));
 
   const totalInitialBudget = categories.reduce((acc, c) => acc + Number(c.initialBudget), 0);
   const totalFinalBudget = categories.reduce((acc, c) => acc + Number(c.finalBudget), 0);
@@ -36,8 +41,13 @@ router.get("/summary/utilization", async (req, res): Promise<void> => {
   });
 });
 
-router.get("/summary/trend", async (_req, res): Promise<void> => {
-  const rows = await db.select().from(yearlyComparisonsTable).orderBy(asc(yearlyComparisonsTable.year));
+router.get("/summary/trend", requireAuth, async (req: any, res): Promise<void> => {
+  const userId: string = req.userId;
+  const rows = await db
+    .select()
+    .from(yearlyComparisonsTable)
+    .where(eq(yearlyComparisonsTable.userId, userId))
+    .orderBy(asc(yearlyComparisonsTable.year));
   res.json(
     rows.map((r) => ({
       id: r.id,

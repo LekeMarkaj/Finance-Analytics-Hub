@@ -4,6 +4,7 @@ import { z } from "zod/v4";
 
 export const balanceSheetItemsTable = pgTable("balance_sheet_items", {
   id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().default(""),
   category: text("category", { enum: ["asset", "liability", "capital"] }).notNull(),
   name: text("name").notNull(),
   amount: numeric("amount", { precision: 18, scale: 2 }).notNull(),

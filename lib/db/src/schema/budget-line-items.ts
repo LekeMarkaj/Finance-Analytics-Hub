@@ -5,6 +5,7 @@ import { budgetCategoriesTable } from "./budget-categories";
 
 export const budgetLineItemsTable = pgTable("budget_line_items", {
   id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().default(""),
   categoryId: integer("category_id").notNull().references(() => budgetCategoriesTable.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   amount: numeric("amount", { precision: 18, scale: 2 }).notNull(),
@@ -13,6 +14,6 @@ export const budgetLineItemsTable = pgTable("budget_line_items", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertBudgetLineItemSchema = createInsertSchema(budgetLineItemsTable).omit({ id: true, createdAt: true });
+export const insertBudgetLineItemSchema = createInsertSchema(budgetLineItemsTable).omit({ id: true, userId: true, createdAt: true });
 export type InsertBudgetLineItem = z.infer<typeof insertBudgetLineItemSchema>;
 export type BudgetLineItem = typeof budgetLineItemsTable.$inferSelect;
