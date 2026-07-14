@@ -44,12 +44,16 @@ export function SectionChart({ section, currency, isEditing, dragHandleProps, on
     <Card className="bg-muted/30 relative">
       {isEditing && (
         <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-background/90 backdrop-blur-sm rounded-md border p-0.5 shadow-sm" data-testid={`chart-toolbar-${section.name}`}>
-          <Button type="button" variant="ghost" size="icon" className="h-7 w-7 cursor-grab active:cursor-grabbing" title={`Drag to reorder: ${section.name}`} {...dragHandleProps}>
-            <GripVertical className="w-3.5 h-3.5" />
-          </Button>
-          <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={onToggleWidth} title={`Toggle width: ${section.name}`}>
-            <ArrowLeftRight className="w-3.5 h-3.5" />
-          </Button>
+          {!isMobile && (
+            <>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7 cursor-grab active:cursor-grabbing" title={`Drag to reorder: ${section.name}`} {...dragHandleProps}>
+                <GripVertical className="w-3.5 h-3.5" />
+              </Button>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={onToggleWidth} title={`Toggle width: ${section.name}`}>
+                <ArrowLeftRight className="w-3.5 h-3.5" />
+              </Button>
+            </>
+          )}
           <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit} title={`Edit data: ${section.name}`}>
             <Pencil className="w-3.5 h-3.5" />
           </Button>
