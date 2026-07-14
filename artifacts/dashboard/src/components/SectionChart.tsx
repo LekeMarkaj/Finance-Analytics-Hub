@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +23,18 @@ interface SectionChartProps {
   onDelete?: () => void;
 }
 
+function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < breakpoint);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 export function SectionChart({ section, currency, isEditing, dragHandleProps, onToggleWidth, onEdit, onDelete }: SectionChartProps) {
+  const isMobile = useIsMobile();
   const data = section.items.map((item, i) => ({
     ...item,
     fill: item.color ?? CHART_COLORS[i % CHART_COLORS.length],
@@ -51,10 +63,10 @@ export function SectionChart({ section, currency, isEditing, dragHandleProps, on
         <CardDescription className="text-xs">{section.items.length} items</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={280}>
+        <ResponsiveContainer width="100%" height={section.chartType === "pie" && isMobile ? 200 : 280}>
           {section.chartType === "pie" ? (
             <PieChart>
-              <Pie data={data} dataKey="value" nameKey="label" cx="50%" cy="50%" outerRadius={100}
+              <Pie data={data} dataKey="value" nameKey="label" cx="50%" cy="50%" outerRadius={isMobile ? 65 : 100}
                 label={({ label, percent }) => `${label} (${(percent * 100).toFixed(1)}%)`} labelLine>
                 {data.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
               </Pie>
