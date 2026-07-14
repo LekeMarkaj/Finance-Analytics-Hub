@@ -132,7 +132,7 @@ function PlanUsageSection() {
 
             {showPlans && (
               <div className="pt-2">
-                <PricingCards currentTier={data.plan.tier} />
+                <PricingCards currentTier={data.plan.tier} currentInterval={data.plan.interval} />
               </div>
             )}
           </>

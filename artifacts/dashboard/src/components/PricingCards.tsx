@@ -43,11 +43,12 @@ function formatPrice(cents: number, currency: string) {
 
 interface PricingCardsProps {
   currentTier?: string;
+  currentInterval?: "month" | "year" | null;
   onCheckoutStart?: () => void;
 }
 
-export default function PricingCards({ currentTier, onCheckoutStart }: PricingCardsProps) {
-  const [billingInterval, setBillingInterval] = useState<"month" | "year">("month");
+export default function PricingCards({ currentTier, currentInterval, onCheckoutStart }: PricingCardsProps) {
+  const [billingInterval, setBillingInterval] = useState<"month" | "year">(currentInterval ?? "month");
   const { isSignedIn } = useUser();
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -143,7 +144,7 @@ export default function PricingCards({ currentTier, onCheckoutStart }: PricingCa
           const isFree = plan.tier === "free";
           const price = isFree ? null : plan.prices.find((p) => p.interval === billingInterval);
           const monthlyPrice = isFree ? null : plan.prices.find((p) => p.interval === "month");
-          const isCurrent = currentTier === plan.tier;
+          const isCurrent = currentTier === plan.tier && (isFree || currentInterval === billingInterval);
           const isPopular = plan.tier === "basic";
           const pending = checkoutMutation.isPending && checkoutMutation.variables === price?.id;
 
