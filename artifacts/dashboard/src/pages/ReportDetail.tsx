@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Trash2, Loader2, AlertCircle, FileText, Pencil, Plus, X, Check, Eye } from "lucide-react";
+import { ArrowLeft, Trash2, Loader2, AlertCircle, Lock, FileText, Pencil, Plus, X, Check, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { apiFetch, type PdfUpload, type ExtractedSection } from "@/lib/reports";
 import { SectionChart } from "@/components/SectionChart";
@@ -100,6 +100,26 @@ export default function ReportDetailPage() {
   }
 
   if (error || !report) {
+    if (isSharePath) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(13,148,136,0.08)" }}>
+            <Lock className="w-8 h-8" style={{ color: "#0D9488" }} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-xl font-semibold" style={{ color: "#1E3A5F" }}>Report is private</p>
+            <p className="text-sm max-w-xs" style={{ color: "#64748B" }}>
+              Reach out to the report owner and ask them to make it public.
+            </p>
+          </div>
+          <a href="https://financeanalytics.replit.app/" target="_self">
+            <Button className="gap-2 mt-2" style={{ backgroundColor: "#0D9488", color: "#fff" }}>
+              <ArrowLeft className="w-4 h-4" />Back to Finance Analytics
+            </Button>
+          </a>
+        </div>
+      );
+    }
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
         <AlertCircle className="w-12 h-12 text-destructive/40" />
