@@ -1,0 +1,31 @@
+kind = "slides"
+previewPath = "/finance-analytics-deck/"
+title = "Finance Analytics Deck"
+version = "1.0.0"
+id = "artifacts/finance-analytics-deck"
+router = "path"
+
+[[integratedSkills]]
+name = "slides"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/finance-analytics-deck/" ]
+localPort = 21462
+
+[services.development]
+run = "pnpm --filter @workspace/finance-analytics-deck run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/finance-analytics-deck", "run", "build" ]
+publicDir = "artifacts/finance-analytics-deck/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21462"
+BASE_PATH = "/finance-analytics-deck/"

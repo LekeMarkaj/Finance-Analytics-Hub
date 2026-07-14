@@ -1,0 +1,50 @@
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567801",
+    "position": 1,
+    "filepath": "src/pages/slides/TitleSlide.tsx",
+    "title": "Finance Analytics Dashboard",
+    "description": "Product overview — what it does and who it's for",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567802",
+    "position": 2,
+    "filepath": "src/pages/slides/ProblemSlide.tsx",
+    "title": "The Problem",
+    "description": "Hospital finance teams work in silos with manual PDF workflows",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567803",
+    "position": 3,
+    "filepath": "src/pages/slides/ProductSlide.tsx",
+    "title": "The Product",
+    "description": "Four core capabilities and who they serve",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567804",
+    "position": 4,
+    "filepath": "src/pages/slides/TechSlide.tsx",
+    "title": "Technical Architecture",
+    "description": "Full-stack: React, Express, Clerk, Paddle, PostgreSQL",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567805",
+    "position": 5,
+    "filepath": "src/pages/slides/PricingSlide.tsx",
+    "title": "Pricing",
+    "description": "Three tiers — Free, Basic, Pro — monthly or yearly",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567806",
+    "position": 6,
+    "filepath": "src/pages/slides/ClosingSlide.tsx",
+    "title": "Get Started",
+    "description": "Live product, contact info, free plan to begin",
+    "speakerNotes": ""
+  }
+]
