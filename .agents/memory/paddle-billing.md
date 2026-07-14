@@ -12,17 +12,6 @@ Paddle stores prices as **integer strings in the smallest currency unit** (cents
 
 **Why:** Paddle Billing v2 REST API requires integer cents; passing decimals causes a 400 error.
 
-## drizzle-kit push TTY workaround
-`drizzle-kit push --force` still prompts interactively for column rename conflicts even with `--force`.
-When running in non-TTY (CI, agent shell), it throws `Interactive prompts require a TTY terminal`.
-
-**Fix:** Run raw SQL migration directly using the pg Pool:
-```js
-import pg from "/path/to/pnpm/.pnpm/pg@.../lib/index.js";
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-await pool.query("ALTER TABLE ...");
-```
-
 ## Product/price seeding
 Paddle products must be created manually or via API — they don't carry over from Stripe.
 Products must have `customData: { tier: "basic"|"pro", createLimit: "15", uploadLimit: "15" }`
@@ -38,6 +27,7 @@ SDK method: `paddle.webhooks.unmarshal(rawBodyString, webhookSecret, signatureHe
 Secrets are global, so sandbox and live keys use separate names selected by `PADDLE_ENVIRONMENT`: `PADDLE_API_KEY`/`PADDLE_WEBHOOK_SECRET` (sandbox) vs `PADDLE_API_KEY_LIVE`/`PADDLE_WEBHOOK_SECRET_LIVE`.
 **Why:** Replit secrets can't differ per environment, so a single key name can't hold both sandbox and live values.
 
-## Live account state (as of July 2026 migration)
-Live catalog already existed with correct customData and USD pricing (incl. yearly) — user chose to keep USD. Live notification destination `ntfset_01kwy6fqxjbcj8ea13k7tm7pc8` exists; NEVER recreate it (rotates secret) — after publishing, PATCH its URL in place to the production domain.
+## Live notification destination
+NEVER recreate the live notification destination `ntfset_01kwy6fqxjbcj8ea13k7tm7pc8` — recreating rotates the webhook secret. To point it at a new domain (e.g. after publishing), PATCH its URL in place.
 Paddle webhook IPs differ per environment: fetch from `{apiBase}/ips` (`data.ipv4_cidrs`), never hard-code.
+User keeps USD pricing on the live catalog (their explicit choice).

@@ -1,29 +1,21 @@
-import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { PanelLeft } from "lucide-react";
-
-function MobileTrigger() {
-  const { isMobile, openMobile } = useSidebar();
-  if (!isMobile || openMobile) return null;
-  return (
-    <SidebarTrigger className="fixed top-3 left-3 z-50 w-9 h-9 flex items-center justify-center rounded-md bg-card border border-border shadow-sm text-muted-foreground hover:text-foreground transition-colors md:hidden">
-      <PanelLeft className="w-4 h-4" />
-    </SidebarTrigger>
-  );
-}
+import { MobileHeader } from "./MobileHeader";
+import { MobileBottomNav } from "./MobileBottomNav";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
-      <MobileTrigger />
+      <MobileHeader />
       <SidebarInset className="font-sans">
-        <div className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+        <div className="flex-1 overflow-auto p-4 pt-[4.5rem] pb-24 md:p-6 md:pt-6 md:pb-6 lg:p-8">
           <div className="max-w-7xl mx-auto w-full">
             {children}
           </div>
         </div>
       </SidebarInset>
+      <MobileBottomNav />
     </SidebarProvider>
   );
 }

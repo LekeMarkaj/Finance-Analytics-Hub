@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useUser } from "@clerk/react";
+import { useUser, useClerk } from "@clerk/react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiFetch } from "@/lib/reports";
 import PricingCards from "@/components/PricingCards";
 import {
-  Settings, Camera, Loader2, Mail, Lock, Check, User, CreditCard, ExternalLink,
+  Settings, Camera, Loader2, Mail, Lock, Check, User, CreditCard, ExternalLink, LogOut,
 } from "lucide-react";
 
 interface UserPlan {
@@ -490,6 +490,22 @@ function PasswordSection() {
   );
 }
 
+function SignOutButton() {
+  const { signOut } = useClerk();
+  const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+  return (
+    <Button
+      variant="outline"
+      className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+      onClick={() => signOut({ redirectUrl: basePath || "/" })}
+    >
+      <LogOut className="w-4 h-4" />
+      Sign out
+    </Button>
+  );
+}
+
 export default function Profile() {
   return (
     <div className="space-y-6">
@@ -526,6 +542,10 @@ export default function Profile() {
 
         <div className="w-full max-w-lg">
           <PasswordSection />
+        </div>
+
+        <div className="w-full max-w-lg">
+          <SignOutButton />
         </div>
       </div>
     </div>
