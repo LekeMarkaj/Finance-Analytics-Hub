@@ -109,7 +109,7 @@ function LandingPage() {
       <header className="border-b border-border px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
         <div className="flex items-center gap-2 font-bold text-foreground">
           <BarChart2 className="w-5 h-5 md:w-6 md:h-6 text-primary" />
-          <span className="text-sm md:text-base">Financial Analytics</span>
+          <span className="text-sm md:text-base">Finance Analytics</span>
         </div>
         <div className="flex items-center gap-2">
           <Link href="/sign-in">
@@ -126,7 +126,7 @@ function LandingPage() {
             <BarChart2 className="w-8 h-8" />
           </div>
           <h1 className="text-4xl font-bold text-foreground">
-            Financial Analytics Dashboard
+            Finance Analytics Dashboard
           </h1>
           <p className="text-lg text-muted-foreground">
             Secure, personalised financial insights for hospital departments and finance teams. Upload PDF reports, analyse trends, and explore your financial data.
@@ -287,7 +287,7 @@ function BrandHeader() {
       <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-primary-foreground">
         <BarChart2 className="w-5 h-5" />
       </div>
-      <span>Financial Analytics</span>
+      <span>Finance Analytics</span>
     </div>
   );
 }
@@ -349,7 +349,7 @@ function ClerkProviderWithRoutes() {
         signUp: {
           start: {
             title: "Create your account",
-            subtitle: "Get started with Financial Analytics",
+            subtitle: "Get started with Finance Analytics",
           },
         },
       }}

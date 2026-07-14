@@ -9,7 +9,7 @@ export function SiteFooter() {
         <div className="space-y-3">
           <div className="flex items-center gap-2 font-bold text-foreground">
             <BarChart2 className="w-5 h-5 text-primary" />
-            <span>Financial Analytics</span>
+            <span>Finance Analytics</span>
           </div>
           <a
             href={`mailto:${SUPPORT_EMAIL}`}

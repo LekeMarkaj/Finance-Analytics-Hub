@@ -43,7 +43,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-3 font-bold text-sidebar-foreground w-full pl-4 pr-3">
           <BarChart2 className="w-5 h-5 flex-shrink-0 text-primary" />
           <span className="truncate flex-1 group-data-[state=collapsed]:hidden">
-            Financial Analytics
+            Finance Analytics
           </span>
         </div>
       </SidebarHeader>

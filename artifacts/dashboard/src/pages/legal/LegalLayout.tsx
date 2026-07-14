@@ -15,7 +15,7 @@ export function LegalLayout({ title, lastUpdated, children }: LegalLayoutProps) 
       <header className="border-b border-border px-6 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-bold text-foreground">
           <BarChart2 className="w-6 h-6 text-primary" />
-          <span>Financial Analytics</span>
+          <span>Finance Analytics</span>
         </Link>
         <div className="flex items-center gap-3">
           <Link href="/sign-in">
