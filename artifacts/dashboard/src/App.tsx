@@ -106,17 +106,17 @@ const clerkAppearance = {
 function LandingPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border px-6 py-4 flex items-center justify-between">
+      <header className="border-b border-border px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
         <div className="flex items-center gap-2 font-bold text-foreground">
-          <BarChart2 className="w-6 h-6 text-primary" />
-          <span>Financial Analytics</span>
+          <BarChart2 className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+          <span className="text-sm md:text-base">Financial Analytics</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link href="/sign-in">
-            <Button variant="outline">Sign In</Button>
+            <Button variant="outline" size="sm" className="text-xs md:text-sm h-8 md:h-9 px-3 md:px-4">Sign In</Button>
           </Link>
           <Link href="/sign-up">
-            <Button>Get Started</Button>
+            <Button size="sm" className="text-xs md:text-sm h-8 md:h-9 px-3 md:px-4">Get Started</Button>
           </Link>
         </div>
       </header>
