@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
-import { Home, LayoutDashboard, FileBarChart2, LogOut, Settings, Users, Sun, Moon, BarChart2 } from "lucide-react";
-import { useUser, useClerk } from "@clerk/react";
+import { Home, LayoutDashboard, FileBarChart2, Settings, Users, Sun, Moon, BarChart2 } from "lucide-react";
+import { useUser } from "@clerk/react";
 import {
   Sidebar,
   SidebarContent,
@@ -29,11 +29,9 @@ export function AppSidebar() {
   const [location] = useLocation();
   const { setOpen, setOpenMobile, isMobile } = useSidebar();
   const { user } = useUser();
-  const { signOut } = useClerk();
   const { isDark, toggleTheme } = useTheme();
 
   const isAdmin = user?.publicMetadata?.role === "admin";
-  const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
   return (
     <Sidebar
@@ -113,14 +111,6 @@ export function AppSidebar() {
                 <Settings className="w-4 h-4" />
                 <span>Account settings</span>
               </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={() => signOut({ redirectUrl: basePath || "/" })}
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Sign out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
