@@ -67,9 +67,14 @@ router.get("/billing/plans", async (_req, res) => {
     });
   }
 
+  const sortedPlans = Array.from(plansByTier.values()).sort((a: any, b: any) => {
+    const order: Record<string, number> = { pro: 1, basic: 2 };
+    return (order[a.tier] ?? 99) - (order[b.tier] ?? 99);
+  });
+
   res.json({
     free: { tier: "free", name: "Free", createLimit: 1, uploadLimit: 1, prices: [] },
-    plans: Array.from(plansByTier.values()),
+    plans: sortedPlans,
   });
 });
 
