@@ -234,14 +234,13 @@ export default function ReportDetailPage() {
           </div>
         </div>
       </div>
-
       {report.extractedData?.summary && (
         <Card>
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground mb-0.5">Summary</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">{report.extractedData.summary}</p>
+                <p className="text-muted-foreground text-[13px] text-left ml-[0px] mr-[0px] pl-[0px] pr-[0px]">{report.extractedData.summary}</p>
               </div>
               {report.extractedData.currency && (
                 <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded flex-shrink-0">
@@ -252,7 +251,6 @@ export default function ReportDetailPage() {
           </CardContent>
         </Card>
       )}
-
       {report.status === "processing" && (
         <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
           <Loader2 className="w-10 h-10 text-primary animate-spin" />
@@ -262,7 +260,6 @@ export default function ReportDetailPage() {
           </div>
         </div>
       )}
-
       {report.status === "error" && (
         <Card className="border-destructive/30 bg-destructive/5">
           <CardContent className="p-4 flex items-start gap-3">
@@ -276,7 +273,6 @@ export default function ReportDetailPage() {
           </CardContent>
         </Card>
       )}
-
       {report.status === "done" && !hasSections && !isEditing && (
         <Card className="border-dashed">
           <CardContent className="p-8 flex flex-col items-center gap-3 text-center">
@@ -294,7 +290,6 @@ export default function ReportDetailPage() {
           </CardContent>
         </Card>
       )}
-
       {report.status === "done" && (hasSections || isEditing) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {sections.map((section, i) => (
@@ -330,7 +325,6 @@ export default function ReportDetailPage() {
           )}
         </div>
       )}
-
       <EditChartDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
