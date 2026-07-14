@@ -142,9 +142,18 @@ export default function PricingCards({ currentTier, onCheckoutStart }: PricingCa
         {allPlans.map((plan) => {
           const isFree = plan.tier === "free";
           const price = isFree ? null : plan.prices.find((p) => p.interval === billingInterval);
+          const monthlyPrice = isFree ? null : plan.prices.find((p) => p.interval === "month");
           const isCurrent = currentTier === plan.tier;
           const isPopular = plan.tier === "basic";
           const pending = checkoutMutation.isPending && checkoutMutation.variables === price?.id;
+
+          // Discount shown only when yearly is selected and both prices exist
+          const isYearly = billingInterval === "year";
+          const fullYearlyAmount = monthlyPrice ? monthlyPrice.unitAmount * 12 : 0;
+          const savedAmount = (isYearly && price && monthlyPrice)
+            ? fullYearlyAmount - price.unitAmount
+            : 0;
+          const savedPct = fullYearlyAmount > 0 ? Math.round((savedAmount / fullYearlyAmount) * 100) : 0;
 
           return (
             <Card
@@ -161,12 +170,27 @@ export default function PricingCards({ currentTier, onCheckoutStart }: PricingCa
                 <CardTitle className="text-base">{plan.name}</CardTitle>
                 {!isFree && (
                   <CardDescription>
-                    <span>
-                      <span className="text-2xl font-bold text-foreground">
-                        {price ? formatPrice(price.unitAmount, price.currency) : "—"}
-                      </span>
-                      <span className="text-muted-foreground text-xs">/{billingInterval === "month" ? "mo" : "yr"}</span>
-                    </span>
+                    <div className="flex flex-col gap-0.5">
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
+                        <span className="text-2xl font-bold text-foreground">
+                          {price ? formatPrice(price.unitAmount, price.currency) : "—"}
+                        </span>
+                        <span className="text-muted-foreground text-xs">/{isYearly ? "yr" : "mo"}</span>
+                        {savedAmount > 0 && (
+                          <span className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800 px-1.5 py-0.5 rounded-full">
+                            Save {savedPct}%
+                          </span>
+                        )}
+                      </div>
+                      {isYearly && savedAmount > 0 && monthlyPrice && (
+                        <span className="text-xs text-muted-foreground">
+                          <span className="line-through">
+                            {formatPrice(fullYearlyAmount, monthlyPrice.currency)}/yr
+                          </span>
+                          {" "}— {formatPrice(savedAmount, monthlyPrice.currency)} off
+                        </span>
+                      )}
+                    </div>
                   </CardDescription>
                 )}
               </CardHeader>
