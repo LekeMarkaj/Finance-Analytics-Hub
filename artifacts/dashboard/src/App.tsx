@@ -159,7 +159,7 @@ function HomeRoute() {
   return (
     <>
       <Show when="signed-in">
-        <Redirect to="/dashboard" />
+        <Redirect to="/pdf-upload" />
       </Show>
       <Show when="signed-out">
         <LandingPage />
