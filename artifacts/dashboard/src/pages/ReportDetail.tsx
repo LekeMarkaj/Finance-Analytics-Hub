@@ -240,7 +240,7 @@ export default function ReportDetailPage() {
             <div className="flex items-start gap-3">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground mb-0.5">Summary</p>
-                <p className="text-muted-foreground text-[13px] text-left ml-[0px] mr-[0px] pl-[0px] pr-[0px]">{report.extractedData.summary}</p>
+                <p className="w-full text-[13px] text-muted-foreground leading-relaxed">{report.extractedData.summary}</p>
               </div>
               {report.extractedData.currency && (
                 <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded flex-shrink-0">
