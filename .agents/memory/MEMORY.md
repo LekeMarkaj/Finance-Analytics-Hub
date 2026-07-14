@@ -1,4 +1,5 @@
 - [Paddle billing gotchas](paddle-billing.md) — key @paddle/paddle-node-sdk quirks for this project's billing integration.
+- [Post-merge schema drift](post-merge-schema-drift.md) — drizzle-kit push dies on any prompt in non-TTY; merged tasks' schema changes then never reach the dev DB → 500s.
 - [Paddle SDK enum casing](paddle-sdk-enum.md) — Environment enum uses lowercase: `Environment.sandbox` / `Environment.production`, not capitalized.
 - [Paddle checkout email fix](paddle-checkout-email.md) — Clerk session claims may not carry email; always fetch via `clerkClient.users.getUser(userId).primaryEmailAddress.emailAddress`.
 - [Paddle portal sessions](paddle-portal-sessions.md) — Paddle Node SDK has no `customerPortalSessions` — must POST to `{apiBase}/customers/{id}/portal-sessions` via raw fetch.
