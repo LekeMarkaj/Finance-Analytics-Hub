@@ -100,7 +100,7 @@ export default function PricingCards({ currentTier, onCheckoutStart }: PricingCa
   const allPlans: Plan[] = [
     data.free,
     ...[...data.plans].sort((a, b) => {
-      const order: Record<string, number> = { pro: 1, basic: 2 };
+      const order: Record<string, number> = { basic: 1, pro: 2 };
       return (order[a.tier] ?? 99) - (order[b.tier] ?? 99);
     }),
   ];
@@ -143,7 +143,7 @@ export default function PricingCards({ currentTier, onCheckoutStart }: PricingCa
           const isFree = plan.tier === "free";
           const price = isFree ? null : plan.prices.find((p) => p.interval === billingInterval);
           const isCurrent = currentTier === plan.tier;
-          const isPopular = plan.tier === "pro";
+          const isPopular = plan.tier === "basic";
           const pending = checkoutMutation.isPending && checkoutMutation.variables === price?.id;
 
           return (

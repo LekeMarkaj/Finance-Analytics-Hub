@@ -68,7 +68,7 @@ router.get("/billing/plans", async (_req, res) => {
   }
 
   const sortedPlans = Array.from(plansByTier.values()).sort((a: any, b: any) => {
-    const order: Record<string, number> = { pro: 1, basic: 2 };
+    const order: Record<string, number> = { basic: 1, pro: 2 };
     return (order[a.tier] ?? 99) - (order[b.tier] ?? 99);
   });
 
