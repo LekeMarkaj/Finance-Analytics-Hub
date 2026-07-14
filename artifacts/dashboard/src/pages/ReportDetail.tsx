@@ -192,7 +192,7 @@ export default function ReportDetailPage() {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-wrap">
               {isReadOnly ? (
                 <Badge variant="secondary" className="gap-1.5 text-xs">
                   <Eye className="w-3.5 h-3.5" />View only
